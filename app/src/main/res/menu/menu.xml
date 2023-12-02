@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/userMainScreenFragment"
+        android:title=""
+        android:icon="@drawable/search_selector"
+        />
+    <item
+        android:id="@+id/addNewProductFragment"
+        android:title=""
+        android:icon="@drawable/add_selector"
+
+        />
+
+    <item
+        android:id="@+id/userDashBoardFragment"
+        android:title=""
+        android:icon="@drawable/settings_selector"
+
+        />
+</menu>

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "325351685098",
+    "project_id": "swapeasefirebase",
+    "storage_bucket": "swapeasefirebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325351685098:android:346b6cb04149e03e0cd093",
+        "android_client_info": {
+          "package_name": "com.example.swapease"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "325351685098-qba3uk4003fcf2176i6m0p650op3u7hn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.swapease",
+            "certificate_hash": "fd13ca2abe7dfc57409ee0075bc96dcff6a95d2d"
+          }
+        },
+        {
+          "client_id": "325351685098-0scjqbe7072545illckf7hk02vodrps9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo58DB9e3W82L2i6s0IHococcs7MKG220"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "325351685098-0scjqbe7072545illckf7hk02vodrps9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
