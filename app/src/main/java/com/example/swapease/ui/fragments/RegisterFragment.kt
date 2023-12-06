@@ -1,14 +1,18 @@
 package com.example.swapease.ui.fragments
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import com.example.swapease.DashboardActivity
+import com.example.swapease.ui.activities.DashboardActivity
 import com.example.swapease.R
 import com.example.swapease.databinding.FragmentRegisterBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -24,7 +28,6 @@ class RegisterFragment : Fragment() {
     lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -39,11 +42,26 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.signUp.isClickable = false
 
         binding.goToRegister.setOnClickListener {
             val action = RegisterFragmentDirections.actionRegisterFragmentToLoginFragment()
             view.findNavController().navigate(action)
+
         }
+
+        binding.etPassword.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(charSequence: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(editable: Editable?) {
+                binding.signUp.isClickable = isPasswordValid(editable.toString())
+            }
+        })
 
         // Initialize sign in options the client-id is copied form google-services.json file
         val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -55,15 +73,11 @@ class RegisterFragment : Fragment() {
 
 
         binding.signUp.setOnClickListener {
+
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
 
-            // Check if email and password are not empty
-            if (email.isNotEmpty() && password.isNotEmpty()) {
-                registerWithEmailAndPassword(email, password)
-            } else {
-                displayToast("Please enter both email and password")
-            }
+            registerWithEmailAndPassword(email, password)
         }
 
         // Initialize firebase auth
@@ -119,8 +133,58 @@ class RegisterFragment : Fragment() {
             }
     }
 
+
+    @SuppressLint("ResourceType")
+    private fun isPasswordValid(password: String): Boolean {
+        val condition = false
+       //val name = binding.etusername.text.toString()
+       //val email = binding.etEmail.text.toString()
+        // val password = binding.etPassword.text.toString()
+
+        /*if (name.isEmpty()) {
+            binding.etusername.error = "Please Enter Full name"
+        }
+
+        if (email.isEmpty()) {
+            binding.etEmail.error = "Please Enter Email"
+        }*/
+
+        // 8 character
+        val is8char: Boolean = password.length >= 8
+        binding.card1.setCardBackgroundColor(
+            if (is8char) {
+                Color.parseColor(getString(R.color.green))
+            } else {
+                Color.parseColor(getString(R.color.gray))
+            }
+        )
+
+        // number
+        val hasNum: Boolean = password.contains(Regex(".*[0-9].*"))
+        binding.card2.setCardBackgroundColor(
+            if (hasNum) {
+                Color.parseColor(getString(R.color.green))
+            } else {
+                Color.parseColor(getString(R.color.gray))
+            }
+        )
+
+        // upper case
+
+        val hasUpper: Boolean = password.contains(Regex(".*[A-Z].*"))
+        binding.card3.setCardBackgroundColor(
+            if (hasUpper) {
+                Color.parseColor(getString(R.color.green))
+            } else {
+                Color.parseColor(getString(R.color.gray))
+            }
+        )
+
+        return is8char && hasNum && hasUpper
+    }
+
+
     private fun displayToast(s: String) {
         Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show()
     }
-
 }

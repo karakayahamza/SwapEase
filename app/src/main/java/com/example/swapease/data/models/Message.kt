@@ -1,11 +1,15 @@
 package com.example.swapease.data.models
 
-class Message {
+import com.google.firebase.firestore.PropertyName
 
-    private val senderUid: String? = null
-    private val receiverUid: String? = null
-    private val messageContent: String? = null
-    private val timestamp: Long = 0
+class Message (
+       @get:PropertyName("senderUid") // veya @PropertyName("senderUid")
+       val senderUid: String = "",
+       @get:PropertyName("receiverUid") // veya @PropertyName("receiverUid")
+       val receiverUid: String = "",
+       @get:PropertyName("text") // veya @PropertyName("text")
+       val text: String = "",
+       @get:PropertyName("timestamp") // veya @PropertyName("timestamp")
+       val timestamp: Long = 0
 
-
-}
+)

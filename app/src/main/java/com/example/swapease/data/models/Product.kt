@@ -3,11 +3,11 @@ package com.example.swapease.data.models
 import android.graphics.Bitmap
 
 data class Product(
-    val sellerUid: String? = null,
+    val publisherUid: String? = null,
     val productName: String? = null,
     val description: String? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val chats: List<Chat>? = null
 ) {
-    // No-argument (parametresiz) kurucu metod
-    constructor() : this("", "","")
+    constructor() : this("", "","","",chats = null)
 }

@@ -13,13 +13,13 @@
     </fragment>
     <fragment
         android:id="@+id/userDashBoardFragment"
-        android:name="com.example.swapease.UserDashBoardFragment"
+        android:name="com.example.swapease.ui.fragments.UserDashBoardFragment"
         android:label="fragment_user_dash_board"
         tools:layout="@layout/fragment_user_dash_board" >
     </fragment>
     <fragment
         android:id="@+id/userMainScreenFragment"
-        android:name="com.example.swapease.UserMainScreenFragment"
+        android:name="com.example.swapease.ui.fragments.UserMainScreenFragment"
         android:label="fragment_user_main_screen"
         tools:layout="@layout/fragment_user_main_screen" >
     </fragment>

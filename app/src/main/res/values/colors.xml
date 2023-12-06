@@ -4,9 +4,16 @@
     <color name="white">#FFFFFFFF</color>
     <color name="colorPrimary">#51a5cf</color>
     <color name="colorPrimaryDark">#539ac4</color>
-    <color name="colorAccent">#ff4081</color>
+    <color name="colorAccent">#FF0000</color>
     <color name="backgroundColor">#E4E4E4</color>
     <color name="uyeButtonColor">#Ffcc00</color>
     <color name="lavender">#8692f7</color>
+    <color name="green">#8BC34A</color>
+    <color name="red">#F44336</color>
+    <color name="default_border_color">#CCCCCC</color>
+    <color name="valid_border_color">#00FF00</color>
+    <color name="invalid_border_color">#FF0000</color>
+    <color name="gray">#515151</color>
+    <!-- ff4081 -->
 
 </resources>

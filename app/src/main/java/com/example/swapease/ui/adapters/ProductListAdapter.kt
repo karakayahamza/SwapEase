@@ -7,12 +7,12 @@ import com.example.swapease.data.models.Product
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.bumptech.glide.Glide
-import com.example.swapease.databinding.ProducRecyclerviewItemBinding
+import com.example.swapease.databinding.ProductRecyclerviewItemBinding
 
 class ProductListAdapter : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(ProductDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
-        val binding = ProducRecyclerviewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ProductRecyclerviewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ProductViewHolder(binding)
     }
 
@@ -21,7 +21,7 @@ class ProductListAdapter : ListAdapter<Product, ProductListAdapter.ProductViewHo
         holder.bind(currentProduct)
     }
 
-    class ProductViewHolder(private val binding: ProducRecyclerviewItemBinding) :
+    class ProductViewHolder(private val binding: ProductRecyclerviewItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(product: Product) {
             binding.apply {

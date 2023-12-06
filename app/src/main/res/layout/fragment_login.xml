@@ -39,6 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_margin="5dp"
                 android:textColorHint="@color/lavender"
+                style="@style/MyTextInputLayout"
                 >
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -62,6 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_margin="5dp"
                 android:textColorHint="@color/lavender"
+                style="@style/MyTextInputLayout"
                 >
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
@@ -72,7 +74,7 @@
                     android:textColor="@color/lavender"
                     android:background="@null"
                     android:textSize="20dp"
-                    android:hint="@string/Password"
+                    android:hint="Password"
                     android:textColorHint="@color/lavender"
                     />
 

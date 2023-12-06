@@ -37,25 +37,6 @@
         android:layout_marginBottom="16dp"
         android:hint="Enter product name"/>
 
-    <TextView
-        android:id="@+id/textViewPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Price"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_below="@id/editTextProductName"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"/>
-
-    <EditText
-        android:id="@+id/editTextPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/textViewPrice"
-        android:layout_marginBottom="16dp"
-        android:inputType="numberDecimal"
-        android:hint="Enter price"/>
 
     <TextView
         android:id="@+id/textViewDescription"
@@ -64,7 +45,7 @@
         android:text="Description"
         android:textSize="18sp"
         android:textColor="@android:color/black"
-        android:layout_below="@id/editTextPrice"
+        android:layout_below="@id/editTextProductName"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"/>
 

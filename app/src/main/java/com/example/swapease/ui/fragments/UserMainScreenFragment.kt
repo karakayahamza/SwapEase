@@ -1,4 +1,4 @@
-package com.example.swapease
+package com.example.swapease.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
@@ -64,6 +64,4 @@ class UserMainScreenFragment : Fragment() {
     companion object {
         const val TAG = "AllProductsFragment"
     }
-
-
 }

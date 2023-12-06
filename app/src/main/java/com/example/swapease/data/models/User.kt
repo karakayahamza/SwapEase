@@ -1,11 +1,8 @@
 package com.example.swapease.data.models
 
-class User (
-    val uid: String = "",
-    val username: String = "",
-    val email: String = ""
-){
-    enum class UserType {
-        BUYER, SELLER
-    }
-}
+data class User(
+    val uid: String? = null,
+    val username: String? = null,
+    val email: String? = null,
+    val products: List<Product>? = null
+)

@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.findNavController
-import com.example.swapease.DashboardActivity
+import com.example.swapease.ui.activities.DashboardActivity
 import com.example.swapease.R
 import com.example.swapease.databinding.FragmentLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
