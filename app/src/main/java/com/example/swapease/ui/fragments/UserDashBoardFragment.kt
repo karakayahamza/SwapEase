@@ -35,7 +35,6 @@ class UserDashBoardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.logoutButton.setOnClickListener {
             val profileImageUrl: String? = currentUser?.photoUrl?.toString()
 
             if (!profileImageUrl.isNullOrEmpty()) {
@@ -45,14 +44,16 @@ class UserDashBoardFragment : Fragment() {
             }
 
             binding.logoutButton.setOnClickListener {
+
+                binding.progressBar.visibility = View.VISIBLE
                 FirebaseAuth.getInstance().signOut()
 
-                val intent = Intent(requireContext(), LoginActivity::class.java)
-                startActivity(intent)
+                val loginIntent = Intent(requireContext(), LoginActivity::class.java)
+                startActivity(loginIntent)
 
                 requireActivity().finish()
-            }
-        }
 
+                binding.progressBar.visibility = View.GONE
+            }
     }
 }

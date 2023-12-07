@@ -14,6 +14,7 @@
     <color name="valid_border_color">#00FF00</color>
     <color name="invalid_border_color">#FF0000</color>
     <color name="gray">#515151</color>
+    <color name="defaultcardviewColor">#FFDBDBDB</color>
     <!-- ff4081 -->
 
 </resources>

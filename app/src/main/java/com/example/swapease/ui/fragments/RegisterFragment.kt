@@ -15,6 +15,7 @@ import androidx.navigation.findNavController
 import com.example.swapease.ui.activities.DashboardActivity
 import com.example.swapease.R
 import com.example.swapease.databinding.FragmentRegisterBinding
+import com.google.android.gms.auth.api.identity.SignInPassword
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -25,7 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-    lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,8 +48,41 @@ class RegisterFragment : Fragment() {
         binding.goToRegister.setOnClickListener {
             val action = RegisterFragmentDirections.actionRegisterFragmentToLoginFragment()
             view.findNavController().navigate(action)
-
         }
+
+
+/*
+        binding.etusername.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                TODO("Not yet implemented")
+            }
+
+        })
+
+        binding.etEmail.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                TODO("Not yet implemented")
+            }
+
+        })
+
+
 
         binding.etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {
@@ -62,6 +96,28 @@ class RegisterFragment : Fragment() {
                 binding.signUp.isClickable = isPasswordValid(editable.toString())
             }
         })
+
+
+        binding.etConfirmPassword.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+
+            }
+        })*/
+
+        binding.etusername.addTextChangedListener(textWatcher)
+        binding.etEmail.addTextChangedListener(textWatcher)
+        binding.etPassword.addTextChangedListener(textWatcher)
+        binding.etConfirmPassword.addTextChangedListener(textWatcher)
+
 
         // Initialize sign in options the client-id is copied form google-services.json file
         val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -100,11 +156,31 @@ class RegisterFragment : Fragment() {
         }
 
     }
+
+    // Her bir EditText'teki değişiklikleri dinleyen TextWatcher
+    val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+        override fun afterTextChanged(s: Editable?) {
+            // Her bir alanın değerini al
+            val username = binding.etusername.text.toString()
+            val email = binding.etEmail.text.toString()
+            val password = binding.etPassword.text.toString()
+            val confirmPassword = binding.etConfirmPassword.text.toString()
+
+            // Tüm alanlar dolu ise kayıt butonunu aktifleştir
+            binding.signUp.isEnabled = validateEmail(email) && isPasswordValid(password) && validateUsername(username) && isConfirmPassword(password,confirmPassword)
+        }
+    }
+
     private fun registerWithEmailAndPassword(email: String, password: String) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     // Registration successful, redirect to profile activity
+                    displayToast("Registration successful")
                     startActivity(
                         Intent(
                             requireContext(),
@@ -112,7 +188,6 @@ class RegisterFragment : Fragment() {
                         ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     )
                     sendVerificationEmail()
-                    displayToast("Registration successful")
                     requireActivity().finish()
                 } else {
                     // Registration failed, display error message
@@ -133,29 +208,15 @@ class RegisterFragment : Fragment() {
             }
     }
 
-
     @SuppressLint("ResourceType")
     private fun isPasswordValid(password: String): Boolean {
-        val condition = false
-       //val name = binding.etusername.text.toString()
-       //val email = binding.etEmail.text.toString()
-        // val password = binding.etPassword.text.toString()
-
-        /*if (name.isEmpty()) {
-            binding.etusername.error = "Please Enter Full name"
-        }
-
-        if (email.isEmpty()) {
-            binding.etEmail.error = "Please Enter Email"
-        }*/
-
         // 8 character
         val is8char: Boolean = password.length >= 8
         binding.card1.setCardBackgroundColor(
             if (is8char) {
                 Color.parseColor(getString(R.color.green))
             } else {
-                Color.parseColor(getString(R.color.gray))
+                Color.parseColor(getString(R.color.default_border_color))
             }
         )
 
@@ -165,7 +226,7 @@ class RegisterFragment : Fragment() {
             if (hasNum) {
                 Color.parseColor(getString(R.color.green))
             } else {
-                Color.parseColor(getString(R.color.gray))
+                Color.parseColor(getString(R.color.default_border_color))
             }
         )
 
@@ -176,14 +237,38 @@ class RegisterFragment : Fragment() {
             if (hasUpper) {
                 Color.parseColor(getString(R.color.green))
             } else {
-                Color.parseColor(getString(R.color.gray))
+                Color.parseColor(getString(R.color.default_border_color))
             }
         )
-
         return is8char && hasNum && hasUpper
     }
 
+    @SuppressLint("ResourceType")
+    private fun validateEmail(email: String): Boolean {
+    // Örneğin, bir regex kullanarak format kontrolü yapabilirsiniz
+        val emailRegex = Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}")
+        return email.matches(emailRegex)
+    }
 
+    @SuppressLint("ResourceType")
+    fun validateUsername(username : String): Boolean{
+        // Username validation
+        val isUsernameValid: Boolean = username.length >= 5
+        return isUsernameValid
+    }
+
+    @SuppressLint("ResourceType")
+    fun isConfirmPassword(password: String, confirmPassword: String):Boolean{
+        val isConfirm : Boolean = password == confirmPassword
+        binding.card4.setCardBackgroundColor(
+            if (isConfirm) {
+                Color.parseColor(getString(R.color.green))
+            } else {
+                Color.parseColor(getString(R.color.default_border_color))
+            }
+        )
+        return isConfirm
+    }
     private fun displayToast(s: String) {
         Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show()
     }
