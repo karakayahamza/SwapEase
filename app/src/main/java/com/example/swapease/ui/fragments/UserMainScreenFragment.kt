@@ -36,7 +36,6 @@ class UserMainScreenFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
 
-        // Tüm ürünleri al ve RecyclerView'e bağla
         getAllProducts()
     }
     private fun setupRecyclerView() {
