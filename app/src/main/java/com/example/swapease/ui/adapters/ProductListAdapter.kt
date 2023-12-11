@@ -9,7 +9,12 @@ import androidx.recyclerview.widget.ListAdapter
 import com.bumptech.glide.Glide
 import com.example.swapease.databinding.ProductRecyclerviewItemBinding
 
-class ProductListAdapter : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(ProductDiffCallback()) {
+class ProductListAdapter(private val onItemClickListener: OnItemLongClickListener?) : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(ProductDiffCallback()) {
+
+
+    interface OnItemLongClickListener {
+        fun onItemLongClick(product: Product)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val binding = ProductRecyclerviewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -19,24 +24,22 @@ class ProductListAdapter : ListAdapter<Product, ProductListAdapter.ProductViewHo
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val currentProduct = getItem(position)
         holder.bind(currentProduct)
+
+        holder.itemView.setOnClickListener {
+            onItemClickListener?.onItemLongClick(currentProduct)
+        }
     }
 
     class ProductViewHolder(private val binding: ProductRecyclerviewItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(product: Product) {
             binding.apply {
-                // Set the product details to the UI elements
-                // For example:
                 textViewProductName.text = product.productName
                 textViewDescription.text = product.description
                 Glide.with(imageViewProduct.context)
                     .load(product.imageUrl)
                     .into(imageViewProduct)
 
-
-                // Load the image using an image loading library like Picasso, Glide, etc.
-                // For example with Picasso:
-                // Picasso.get().load(product.imageUrl).into(imageViewProduct)
             }
         }
     }

@@ -16,7 +16,7 @@
     <item
         android:id="@+id/userDashBoardFragment"
         android:title=""
-        android:icon="@drawable/settings_selector"
+        android:icon="@drawable/user_selector"
 
         />
 </menu>

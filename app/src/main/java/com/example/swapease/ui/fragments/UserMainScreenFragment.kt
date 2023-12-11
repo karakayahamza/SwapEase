@@ -39,7 +39,7 @@ class UserMainScreenFragment : Fragment() {
         getAllProducts()
     }
     private fun setupRecyclerView() {
-        adapter = ProductListAdapter()
+        adapter = ProductListAdapter(null)
         binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = adapter
     }

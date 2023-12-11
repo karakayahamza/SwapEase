@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "325351685098",
+    "firebase_url": "https://swapeasefirebase-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "swapeasefirebase",
     "storage_bucket": "swapeasefirebase.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "325351685098-5m71kclcgh1ino362uh5l7mhk0qoeias.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.swapease",
+            "certificate_hash": "bee2be34a5aa30419b1596494a5c2b5393a8d22a"
+          }
+        },
         {
           "client_id": "325351685098-qba3uk4003fcf2176i6m0p650op3u7hn.apps.googleusercontent.com",
           "client_type": 1,

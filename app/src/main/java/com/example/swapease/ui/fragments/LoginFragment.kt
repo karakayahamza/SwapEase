@@ -50,6 +50,35 @@ class LoginFragment : Fragment() {
             view.findNavController().navigate(action)
         }
 
+        binding.singIn.setOnClickListener {
+
+            val email = binding.etEmail.text.toString()
+            val password = binding.etPassword.text.toString()
+
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(requireActivity()) { task ->
+                        if (task.isSuccessful) {
+                            // Successful sign-in, redirect to DashboardActivity
+                            startActivity(
+                                Intent(
+                                    requireActivity(),
+                                    DashboardActivity::class.java
+                                ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                            displayToast("Email sign-in successful")
+                            requireActivity().finish()
+                        } else {
+                            // Sign-in failed, display error message
+                            displayToast("Sign-in failed: ${task.exception?.message}")
+                        }
+                    }
+            } else {
+                // Warn the user if email or password is empty
+                displayToast("Email or password cannot be empty")
+            }
+        }
+
         // Initialize sign in options the client-id is copied form google-services.json file
         val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.your_web_client_id))

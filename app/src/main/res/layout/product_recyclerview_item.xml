@@ -10,6 +10,27 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right"
+            >
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/bookmark"
+                android:background="@null"
+                android:layout_margin="10dp"
+                />
+
+        </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -37,6 +58,11 @@
             android:layout_marginTop="4dp"
             android:text="Product Description"
             android:textSize="14sp" />
+    </LinearLayout>
+    
+
+        
+        
     </LinearLayout>
 
 
