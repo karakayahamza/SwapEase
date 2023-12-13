@@ -11,27 +11,11 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
 
+
     </style>
 
-    <style name="MyOutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <!-- Çerçeve rengi -->
-        <item name="boxStrokeColor">@color/lavender</item>
-        <!-- Hata durumunda çerçeve rengi -->
-        <item name="boxStrokeErrorColor">@color/red</item>
-        <!-- Arkaplan rengi -->
-        <item name="backgroundColor">@null</item>
-        <!-- Metin rengi -->
-        <item name="android:textColor">@color/lavender</item>
-        <!-- Kutunun içindeki arka plan rengi -->
-        <item name="boxBackgroundColor">@null</item>
-        <!-- Diğer özellikleri buraya ekleyebilirsiniz -->
-        <item name="android:textColorHint">@color/lavender</item>
+    <style name="MyTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/gray</item>
+        <item name="backgroundColor">@color/white</item>
     </style>
-
-
-    <style name="circleImageView" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">50%</item>
-    </style>
-
 </resources>
