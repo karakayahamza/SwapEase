@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/dashboard_nav_graph"
-    app:startDestination="@id/addNewProductFragment">
+    app:startDestination="@id/userMainScreenFragment">
 
     <fragment
         android:id="@+id/addNewProductFragment"
@@ -37,6 +37,9 @@
         <argument
             android:name="product"
             app:argType="com.example.swapease.data.models.Product" />
+        <action
+            android:id="@+id/action_productDetailsFragment_to_messagingFragment"
+            app:destination="@id/messagingFragment" />
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
@@ -47,4 +50,14 @@
             android:name="product"
             app:argType="com.example.swapease.data.models.Product" />
     </fragment>
+    <fragment
+        android:id="@+id/chatBoxFragment"
+        android:name="com.example.swapease.ChatBoxFragment"
+        android:label="fragment_chat_box"
+        tools:layout="@layout/fragment_chat_box" />
+    <fragment
+        android:id="@+id/messagingFragment"
+        android:name="com.example.swapease.ui.fragments.MessagingFragment"
+        android:label="fragment_messaging"
+        tools:layout="@layout/fragment_messaging" />
 </navigation>

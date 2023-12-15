@@ -66,9 +66,6 @@ class UserMainScreenFragment : Fragment() {
         binding.recyclerViewProducts.adapter = adapter
     }
 
-
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

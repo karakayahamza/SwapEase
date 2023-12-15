@@ -5,26 +5,26 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.findNavController
+import com.bumptech.glide.Glide
 import com.example.swapease.R
+import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentChatBinding
 import com.example.swapease.databinding.FragmentProductDetailsBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM1 = "product"
 class ProductDetailsFragment : Fragment() {
     private var _binding: FragmentProductDetailsBinding? = null
     private val binding get() = _binding!!
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var param1: Product? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            param1 = it.getParcelable(ARG_PARAM1)
         }
     }
 
@@ -39,6 +39,26 @@ class ProductDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
+        binding.goToChat.setOnClickListener {
+/*
+            val action = ProductDetailsFragmentDirections.actionProductDetailsFragmentToChatFragment(
+                param1!!
+            )
+            view.findNavController().navigate(action)
+*/
+
+            val action2 = ProductDetailsFragmentDirections.actionProductDetailsFragmentToMessagingFragment()
+            view.findNavController().navigate(action2)
+
+        }
+        binding.textViewProductName.text = param1!!.productName
+        binding.textViewDescription.text = param1!!.description
+        Glide.with(requireContext())
+            .load(param1!!.imageUrl)
+            .into(binding.imageViewProduct)
+
 
 
 
@@ -58,11 +78,10 @@ class ProductDetailsFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(param1: Product, param2: String) =
             ProductDetailsFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putParcelable(ARG_PARAM1, param1)
                 }
             }
     }

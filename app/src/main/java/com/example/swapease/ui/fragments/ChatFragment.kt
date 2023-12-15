@@ -38,7 +38,7 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+/*
         messageAdapter = MessageAdapter()
         binding.recyclerViewChat.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewChat.adapter = messageAdapter
@@ -66,6 +66,10 @@ class ChatFragment : Fragment() {
                 binding.editTextMessage.text.clear()
             }
         }
+*/
+
+
+
 
     }
 

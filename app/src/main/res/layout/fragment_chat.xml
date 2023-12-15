@@ -1,39 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="2dp"
     android:orientation="vertical"
     tools:context=".ui.fragments.ChatFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewChat"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp"
-        android:background="#F5F5F5"/>
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_gchat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="16dp"
+            app:layout_constrainedHeight="true"
+            app:layout_constraintBottom_toTopOf="@+id/text_gchat_indicator"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/editTextMessage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Type a message"/>
-
-        <Button
-            android:id="@+id/buttonSendMessage"
+        <TextView
+            android:id="@+id/text_gchat_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send"/>
-    </LinearLayout>
+            android:layout_marginStart="16dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/view"
+            app:layout_constraintStart_toStartOf="parent" />
 
-</LinearLayout>
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#e0e0e0"
+            app:layout_constraintBottom_toTopOf="@+id/layout_gchat_chatbox" />
+
+        <RelativeLayout
+            android:id="@+id/layout_gchat_chatbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+
+            <EditText
+                android:layout_marginStart="16dp"
+                android:id="@+id/edit_gchat_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/button_gchat_send"
+                android:background="@android:color/transparent"
+                android:hint="Enter Message"
+                android:inputType="text"
+                android:maxLines="6"
+                tools:ignore="Autofill" />
+
+            <Button
+                android:id="@+id/button_gchat_send"
+                android:layout_width="64dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:background="?attr/selectableItemBackground"
+                android:text="Send"
+                android:textColor="@color/colorPrimary" />
+
+        </RelativeLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

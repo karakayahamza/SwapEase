@@ -10,8 +10,6 @@ import com.bumptech.glide.Glide
 import com.example.swapease.databinding.ProductRecyclerviewItemBinding
 
 class ProductListAdapter(private val onItemClickListener: OnItemClickListener?) : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(ProductDiffCallback()) {
-
-
     interface OnItemClickListener {
         fun onItemClick(product: Product)
         fun onItemLongClick(product: Product)

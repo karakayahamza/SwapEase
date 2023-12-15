@@ -68,7 +68,7 @@ class UserDashBoardFragment : Fragment() {
 
         // Kullanıcının kendi ürünlerini görüntüleme sorgusu
         db.collection("products")
-            .whereEqualTo("sellerUid", currentUserUid)
+            .whereEqualTo("publisherUid", currentUserUid)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 for (document in querySnapshot.documents) {
