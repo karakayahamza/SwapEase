@@ -1,27 +1,27 @@
 package com.example.swapease.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.viewModels
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentUserMainScreenBinding
 import com.example.swapease.ui.adapters.ProductListAdapter
-import com.google.firebase.firestore.FirebaseFirestore
-
+import com.example.swapease.ui.viewmodels.UserMainScreenViewModel
 class UserMainScreenFragment : Fragment() {
 
     private var _binding: FragmentUserMainScreenBinding? = null
     private val binding get() = _binding!!
-    private val db = FirebaseFirestore.getInstance()
     private lateinit var adapter: ProductListAdapter
+    private val viewModel: UserMainScreenViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(
@@ -35,32 +35,42 @@ class UserMainScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        // Observe products data
+        viewModel.products.observe(viewLifecycleOwner) { products ->
+            adapter.submitList(products)
+        }
 
-        getAllProducts()
+        // Observe error events
+        viewModel.errorEvent.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { exception ->
+                // Show a toast message with the error details
+                Toast.makeText(requireContext(), "Error: ${exception.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // Fetch products from ViewModel
+        viewModel.getAllProducts()
     }
     private fun setupRecyclerView() {
-        adapter = ProductListAdapter(null)
+        adapter = ProductListAdapter(object : ProductListAdapter.OnItemClickListener {
+            override fun onItemClick(product: Product) {
+                val action = UserMainScreenFragmentDirections.actionUserMainScreenFragmentToProductDetailsFragment(product)
+                view?.findNavController()?.navigate(action)
+            }
+
+            override fun onItemLongClick(product: Product) {
+
+            }
+        })
+
         binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = adapter
     }
 
-    private fun getAllProducts() {
-        db.collection("products")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val products = mutableListOf<Product>()
-                for (document in querySnapshot) {
-                    val product = document.toObject(Product::class.java)
-                    products.add(product)
-                }
-                adapter.submitList(products)
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error getting all products", e)
-            }
-    }
 
-    companion object {
-        const val TAG = "AllProductsFragment"
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

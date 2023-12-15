@@ -9,10 +9,11 @@ import androidx.recyclerview.widget.ListAdapter
 import com.bumptech.glide.Glide
 import com.example.swapease.databinding.ProductRecyclerviewItemBinding
 
-class ProductListAdapter(private val onItemClickListener: OnItemLongClickListener?) : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(ProductDiffCallback()) {
+class ProductListAdapter(private val onItemClickListener: OnItemClickListener?) : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(ProductDiffCallback()) {
 
 
-    interface OnItemLongClickListener {
+    interface OnItemClickListener {
+        fun onItemClick(product: Product)
         fun onItemLongClick(product: Product)
     }
 
@@ -26,7 +27,12 @@ class ProductListAdapter(private val onItemClickListener: OnItemLongClickListene
         holder.bind(currentProduct)
 
         holder.itemView.setOnClickListener {
+            onItemClickListener?.onItemClick(currentProduct)
+        }
+
+        holder.itemView.setOnLongClickListener {
             onItemClickListener?.onItemLongClick(currentProduct)
+            true // Return true to consume the long click event
         }
     }
 

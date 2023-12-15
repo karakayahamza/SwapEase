@@ -1,90 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_gravity="center"
-    android:padding="10dp"
-    tools:context=".ui.fragments.UserDashBoardFragment">
+    tools:context=".ui.fragments.ProductDetailsFragment">
 
+    <androidx.cardview.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="20dp"
-            android:paddingTop="10dp"
-            android:paddingRight="20dp">
+            android:gravity="center"
+            >
 
-            <!--Top Profile Section -->
-
-            <ImageButton
-                android:id="@+id/logoutButton"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:background="@color/white"
-                android:src="@drawable/sign_out"
-                tools:ignore="TouchTargetSizeCheck" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
+                <ImageView
+                    android:id="@+id/imageViewProduct"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/appicon" />
+
+                <TextView
+                    android:id="@+id/textViewProductName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Product Name"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+
+                <TextView
+                    android:id="@+id/textViewDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Product Description"
+                    android:textSize="14sp" />
+            </LinearLayout>
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:gravity="center"
-                android:orientation="vertical"
-                android:padding="16dp"
                 >
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    app:cardCornerRadius="30dp"
-                    app:cardElevation="20dp">
-
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/profileImageView"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:padding="5dp"
-                        app:strokeWidth="2dp"
-                        app:strokeColor="@color/lavender"
-                        app:shapeAppearanceOverlay="@style/circleImageView"
-                        android:src="@drawable/user_profile"
-                        android:layout_margin="10dp"/>
-
-                </androidx.cardview.widget.CardView>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    >
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="User Name"
-                        android:textColor="@color/lavender"
-                        android:textSize="21sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/uid"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="User UID"
-                        android:textSize="14sp" />
-
-
-                </LinearLayout>
-
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/user"
+                />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -165,12 +146,15 @@
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
-
                 </LinearLayout>
             </LinearLayout>
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewProducts"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            <Button
+                android:id="@+id/goToChat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contact Publisher"
+                android:layout_margin="20dp"
+                />
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </LinearLayout>

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.swapease.data.models.Product
@@ -16,10 +17,7 @@ import com.example.swapease.databinding.FragmentUserDashBoardBinding
 import com.example.swapease.ui.activities.LoginActivity
 import com.example.swapease.ui.adapters.ProductListAdapter
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 
 
 class UserDashBoardFragment : Fragment() {
@@ -111,12 +109,16 @@ class UserDashBoardFragment : Fragment() {
 
 
     private fun setupRecyclerView() {
-        adapter = ProductListAdapter(object : ProductListAdapter.OnItemLongClickListener {
+        adapter = ProductListAdapter(object : ProductListAdapter.OnItemClickListener {
+            override fun onItemClick(product: Product) {
+
+            }
             override fun onItemLongClick(product: Product) {
-                //deleteProduct(product.productId.toString())
                 showDeleteConfirmationDialog(product)
             }
         })
+
+
         binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = adapter
 

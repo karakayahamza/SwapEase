@@ -6,7 +6,6 @@ import com.example.swapease.data.models.Chat
 import com.example.swapease.data.models.Message
 import com.example.swapease.data.models.Product
 import com.example.swapease.data.models.User
-import com.example.swapease.databinding.ActivityDashboardBinding
 import com.example.swapease.databinding.ActivityTestBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
