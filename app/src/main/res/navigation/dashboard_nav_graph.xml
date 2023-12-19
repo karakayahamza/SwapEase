@@ -10,6 +10,9 @@
         android:name="com.example.swapease.ui.fragments.AddNewProductFragment"
         android:label="fragment_add_new_product"
         tools:layout="@layout/fragment_add_new_product" >
+        <action
+            android:id="@+id/action_addNewProductFragment_to_userMainScreenFragment"
+            app:destination="@id/userMainScreenFragment" />
     </fragment>
     <fragment
         android:id="@+id/userDashBoardFragment"
@@ -37,9 +40,6 @@
         <argument
             android:name="product"
             app:argType="com.example.swapease.data.models.Product" />
-        <action
-            android:id="@+id/action_productDetailsFragment_to_messagingFragment"
-            app:destination="@id/messagingFragment" />
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
@@ -49,15 +49,19 @@
         <argument
             android:name="product"
             app:argType="com.example.swapease.data.models.Product" />
+        <action
+            android:id="@+id/action_chatFragment_to_messagingFragment"
+            app:destination="@id/messagingFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/chatBoxFragment"
-        android:name="com.example.swapease.ChatBoxFragment"
-        android:label="fragment_chat_box"
-        tools:layout="@layout/fragment_chat_box" />
     <fragment
         android:id="@+id/messagingFragment"
         android:name="com.example.swapease.ui.fragments.MessagingFragment"
         android:label="fragment_messaging"
-        tools:layout="@layout/fragment_messaging" />
+        tools:layout="@layout/fragment_messaging" >
+        <argument
+            android:name="chatBox"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="empty" />
+    </fragment>
 </navigation>

@@ -40,6 +40,8 @@ class ProductListAdapter(private val onItemClickListener: OnItemClickListener?) 
             binding.apply {
                 textViewProductName.text = product.productName
                 textViewDescription.text = product.description
+                publisherName.text = product.publisherName
+                date.text = product.addedDate
                 Glide.with(imageViewProduct.context)
                     .load(product.imageUrl)
                     .into(imageViewProduct)
@@ -47,7 +49,6 @@ class ProductListAdapter(private val onItemClickListener: OnItemClickListener?) 
             }
         }
     }
-
     private class ProductDiffCallback : DiffUtil.ItemCallback<Product>() {
         override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean {
             return oldItem == newItem

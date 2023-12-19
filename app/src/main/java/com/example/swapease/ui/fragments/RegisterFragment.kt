@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.example.swapease.ui.activities.DashboardActivity
 import com.example.swapease.R
+import com.example.swapease.data.models.User
 import com.example.swapease.databinding.FragmentRegisterBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -28,7 +29,6 @@ class RegisterFragment : Fragment() {
     private val binding by lazy {
         FragmentRegisterBinding.inflate(layoutInflater)
     }
-
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
@@ -109,8 +109,22 @@ class RegisterFragment : Fragment() {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-                    displayToast("Registration successful")
-                    sendVerificationEmail()
+                    // Kullanıcı başarıyla kaydedildi, Firestore'a bilgileri ekleyelim
+                    val userId = firebaseAuth.currentUser?.uid ?: ""
+                    val username = binding.etusername.text.toString()
+                    val newUser = User(uid = userId, username = username, email = email,null)
+
+                    // Firestore'a kullanıcı bilgilerini ekle
+                    firestore.collection("users")
+                        .document(userId)
+                        .set(newUser)
+                        .addOnSuccessListener {
+                            displayToast("Registration successful")
+                            sendVerificationEmail()
+                        }
+                        .addOnFailureListener {
+                            displayToast("Failed to add user to Firestore: ${it.message}")
+                        }
                 } else {
                     displayToast("Registration failed: ${task.exception?.message}")
                 }

@@ -5,28 +5,36 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.swapease.data.models.Message
-import com.example.swapease.data.repositories.FirebaseRepository
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
-class MessageViewModel(private val repository: FirebaseRepository) : ViewModel() {
-    private val _messages = MutableLiveData<List<Message>>()
-    val messages: LiveData<List<Message>> get() = _messages
+class MessageViewModel : ViewModel() {
 
-    fun sendMessage(senderUid: String, receiverUid: String, text: String) {
-        val timestamp = System.currentTimeMillis()
-        val message = Message(senderUid, receiverUid, text, timestamp)
+    private val db = FirebaseFirestore.getInstance()
+    private val messages = MutableLiveData<List<Message>>()
 
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.sendChatMessage(message)
-        }
-    }
+    fun getMessages(senderUid: String, receiverUid: String): LiveData<List<Message>> {
+        // Firebase Firestore'dan veriyi çekme
+        db.collection("messages")
+            .whereEqualTo("senderUid", senderUid)
+            .whereEqualTo("receiverUid", receiverUid)
+            .addSnapshotListener { querySnapshot, _ ->
+                if (querySnapshot != null) {
+                    val messageList = mutableListOf<Message>()
+                    for (document in querySnapshot.documents) {
+                        val message = document.toObject(Message::class.java)
+                        message?.let {
+                            messageList.add(it)
+                        }
+                    }
+                    messages.value = messageList
+                }
+            }
 
-    fun loadChatMessages(senderUid: String, receiverUid: String) {
-        val query = repository.getChatMessages(senderUid, receiverUid)
-        query.addSnapshotListener { snapshot, _ ->
-            val messages = snapshot?.toObjects(Message::class.java)
-            _messages.value = messages!!
-        }
+        return messages
     }
 }

@@ -2,19 +2,34 @@ package com.example.swapease
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.swapease.data.models.Chat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.swapease.data.models.Message
 import com.example.swapease.data.models.Product
 import com.example.swapease.data.models.User
+import com.example.swapease.databinding.ActivityProfileBinding
 import com.example.swapease.databinding.ActivityTestBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class TestActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTestBinding
-    private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
     private val products = mutableListOf<Product>()
+    private lateinit var database: FirebaseDatabase
+    private lateinit var currentUserId: String
+
+
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
+    private lateinit var chatAdapter: ChatAdapter
+    private lateinit var chatId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,106 +37,102 @@ class TestActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        binding.registerButton.setOnClickListener {
-            registerUser("kullanic23232i@example.com", "password123")
-        }
+        firestore = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
 
-        // Ürün ekleme işlemi (örnek için bir buton tetiklemesi olarak kabul edelim)
-        binding.addProductButton.setOnClickListener {
-            addProduct("Ürün Adı", "Ürün Açıklaması")
-        }
+        val userId = auth.currentUser?.uid
+        val otherUserId = "VVdbaIJi0Kd1Yf53HkZtMRv6RWT2"
 
-        // Ürün listesini alıp kullanıcıya gösterme
+        // Kullanıcılar arasında paylaşılan bir sohbet odası oluştur
+        chatId = if (userId!! < otherUserId) "$userId$otherUserId" else "$otherUserId$userId"
 
+        // Mesajları görüntülemek ve göndermek için bir adapter kullanılır
+        chatAdapter = ChatAdapter(userId)
+        val layoutManager = LinearLayoutManager(this)
+        binding.chatRecyclerView.layoutManager = layoutManager
+        binding.chatRecyclerView.adapter = chatAdapter
 
-        // Kullanıcının bir ürüne tıklaması durumunda (örnek için bir ürün listesi öğesine tıklama olarak kabul edelim)
-        binding.SHOWALL.setOnClickListener {
+        // Firestore veritabanındaki belirli bir sohbet odasını dinle
+        firestore.collection("users")
+            .document(userId)
+            .collection("chats")
+            .document(chatId)
+            .collection("messages")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    // Hata durumunda işlemleri burada ele alabilirsiniz.
+                    println(e)
+                    return@addSnapshotListener
+                }
 
-            loadProducts { produclist, exception ->
-                if (exception == null) {
-                    // Veriler başarıyla alındı, productList kullanılabilir
-                    produclist?.get(0)?.publisherUid?.let { sendMessage(it, "Merhaba, ürün hakkında bilgi alabilir miyim?") }
-                } else {
-                    // Hata durumu
-                    println("Ürünleri yüklerken hata oluştu: $exception")
+                for (dc in snapshots!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> {
+                            // Yeni bir mesaj eklenirse
+                            val message = dc.document.toObject(Message::class.java)
+                            chatAdapter.addMessage(message)
+                            binding.chatRecyclerView.scrollToPosition(chatAdapter.itemCount - 1)
+                            println("Message: ${message.text}")
+                        }
+                        // Diğer durumlar da ele alınabilir (modified, removed, moved)
+                        DocumentChange.Type.MODIFIED -> TODO()
+                        DocumentChange.Type.REMOVED -> TODO()
+                    }
                 }
             }
-            //val selectedProduct = list[list.size]
 
-        }
+        // Diğer kullanıcının belirli bir sohbet odasındaki mesajları dinle
+        firestore.collection("users")
+            .document(otherUserId)
+            .collection("chats")
+            .document(chatId)
+            .collection("messages")
+            .addSnapshotListener { receiverSnapshots, receiverException ->
+                if (receiverException != null) {
+                    // Hata durumunda işlemleri burada ele alabilirsiniz.
+                    return@addSnapshotListener
+                }
 
-    }
-
-    private fun registerUser(email: String, password: String) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    addUserToFirestore(user?.uid, "Kullanıcı Adı", email)
-                } else {
-                    println("Kullanıcı oluşturulurken hata oluştu: ${task.exception?.message}")
+                for (receiverDc in receiverSnapshots!!.documentChanges) {
+                    when (receiverDc.type) {
+                        DocumentChange.Type.ADDED -> {
+                            // Yeni bir mesaj eklenirse (Alıcı)
+                            val message = receiverDc.document.toObject(Message::class.java)
+                            chatAdapter.addMessage(message)
+                            binding.chatRecyclerView.scrollToPosition(chatAdapter.itemCount - 1)
+                        }
+                        // Diğer durumlar da ele alınabilir (modified, removed, moved)
+                        DocumentChange.Type.MODIFIED -> TODO()
+                        DocumentChange.Type.REMOVED -> TODO()
+                    }
                 }
             }
-    }
 
-    private fun addUserToFirestore(uid: String?, username: String, email: String) {
-        if (uid != null) {
-            val newUser = User(uid, username, email)
-            db.collection("users").document(uid)
-                .set(newUser)
-                .addOnSuccessListener {
-                    println("Kullanıcı Firestore'a eklendi.")
-                }
-                .addOnFailureListener { e ->
-                    println("Kullanıcı eklenirken hata oluştu: $e")
-                }
-        }
-    }
 
-    private fun addProduct(productName: String, description: String) {
-        val uid = auth.currentUser?.uid
-        if (uid != null) {
-            val newProduct = Product(productName, description, uid)
-            db.collection("products").document()
-                .set(newProduct)
-                .addOnSuccessListener {
-                    println("Ürün Firestore'a eklendi.")
-                }
-                .addOnFailureListener { e ->
-                    println("Ürün eklenirken hata oluştu: $e")
-                }
-        }
-    }
+        // Mesaj gönderme butonuna tıklanınca çağrılacak fonksiyon
+        binding.sendMessageButton.setOnClickListener {
+            val messageText = binding.messageEditText.text.toString().trim()
+            if (messageText.isNotEmpty()) {
+                val message = Message(userId!!, otherUserId, messageText, System.currentTimeMillis())
 
-    fun loadProducts(callback: (List<Product>?, Exception?) -> Unit) {
-        db.collection("products")
-            .get()
-            .addOnSuccessListener { documents ->
-                val productList = mutableListOf<Product>()
-                for (document in documents) {
-                    val product = document.toObject(Product::class.java)
-                    productList.add(product)
-                }
-                callback(productList, null)
+                // Firestore veritabanına yeni mesajı gönderen belgesine ekle
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("chats")
+                    .document(chatId)
+                    .collection("messages")
+                    .add(message)
+
+                // Firestore veritabanına yeni mesajı alıcı belgesine ekle
+                firestore.collection("users")
+                    .document(otherUserId)
+                    .collection("chats")
+                    .document(chatId)
+                    .collection("messages")
+                    .add(message)
+
+                binding.messageEditText.text.clear()
             }
-            .addOnFailureListener { e ->
-                callback(null, e)
-            }
-    }
-
-    private fun sendMessage(receiverUid: String, messageText: String) {
-        val senderUid = auth.currentUser?.uid
-        if (senderUid != null) {
-            val newMessage = Message(senderUid, receiverUid, messageText, System.currentTimeMillis())
-            val chatDocRef = db.collection("chats").document()
-            chatDocRef.set(Chat(chatDocRef.id, listOf(newMessage)))
-                .addOnSuccessListener {
-                    println("Mesaj gönderildi.")
-                }
-                .addOnFailureListener { e ->
-                    println("Mesaj gönderilirken hata oluştu: $e")
-                }
         }
     }
-
 }

@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.navigation.findNavController
 import com.example.swapease.ui.activities.DashboardActivity
 import com.example.swapease.R
+import com.example.swapease.data.models.User
 import com.example.swapease.databinding.FragmentLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -116,56 +117,49 @@ class LoginFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        // Check condition
         if (requestCode == 100) {
-            // When request code is equal to 100 initialize task
             val signInAccountTask: Task<GoogleSignInAccount> =
                 GoogleSignIn.getSignedInAccountFromIntent(data)
 
-            // check condition
             if (signInAccountTask.isSuccessful) {
-                // When google sign in successful initialize string
-                val s = "Google sign in successful"
-                // Display Toast
-                displayToast(s)
-                // Initialize sign in account
-                try {
-                    // Initialize sign in account
-                    val googleSignInAccount = signInAccountTask.getResult(ApiException::class.java)
-                    // Check condition
-                    if (googleSignInAccount != null) {
-                        // When sign in account is not equal to null initialize auth credential
-                        val authCredential: AuthCredential = GoogleAuthProvider.getCredential(
-                            googleSignInAccount.idToken, null
-                        )
-                        // Check credential
-                        firebaseAuth.signInWithCredential(authCredential)
-                            .addOnCompleteListener(requireActivity()) { task ->
-                                // Check condition
-                                if (task.isSuccessful) {
-                                    // When task is successful redirect to profile activity
-                                    startActivity(
-                                        Intent(
-                                            requireActivity(),
-                                            DashboardActivity::class.java
-                                        ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    )
-                                    // Display Toast
-                                    displayToast("Firebase authentication successful")
-                                    requireActivity().finish()
-                                } else {
-                                    // When task is unsuccessful display Toast
-                                    displayToast(
-                                        "Authentication Failed :" + task.exception!!.message
-                                    )
-                                }
+                val googleSignInAccount = signInAccountTask.getResult(ApiException::class.java)
+                if (googleSignInAccount != null) {
+                    val authCredential: AuthCredential = GoogleAuthProvider.getCredential(
+                        googleSignInAccount.idToken, null
+                    )
+
+                    firebaseAuth.signInWithCredential(authCredential)
+                        .addOnCompleteListener(requireActivity()) { task ->
+                            if (task.isSuccessful) {
+                                val userId = firebaseAuth.currentUser?.uid ?: ""
+                                val username = googleSignInAccount.displayName ?: ""
+                                val email = googleSignInAccount.email ?: ""
+                                val newUser = User(uid = userId, username = username, email = email,null)
+
+                                // Firestore'a kullanıcı bilgilerini ekle
+                                firestore.collection("users").document(userId)
+                                    .set(newUser)
+                                    .addOnSuccessListener {
+                                        startActivity(
+                                            Intent(
+                                                requireActivity(),
+                                                DashboardActivity::class.java
+                                            ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        )
+                                        displayToast("Firebase authentication successful")
+                                        requireActivity().finish()
+                                    }
+                                    .addOnFailureListener {
+                                        displayToast("Failed to add user to Firestore: ${it.message}")
+                                    }
+                            } else {
+                                displayToast("Authentication Failed: ${task.exception?.message}")
                             }
-                    }
-                } catch (e: ApiException) {
-                    e.printStackTrace()
+                        }
                 }
+            } else {
+                Toast.makeText(requireContext(), "Invalid e-mail or password", Toast.LENGTH_SHORT).show()
             }
-            else Toast.makeText(requireContext(),"Invalid e-mail or password",Toast.LENGTH_SHORT).show()
         }
     }
 

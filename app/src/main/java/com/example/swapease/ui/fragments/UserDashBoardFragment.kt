@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.swapease.data.models.Product
@@ -30,7 +29,6 @@ class UserDashBoardFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,24 +63,31 @@ class UserDashBoardFragment : Fragment() {
     private fun getAllProducts() {
         // Kullanıcının UID'sini al
         val currentUserUid = auth.currentUser?.uid
+        binding.userName.text = auth.currentUser?.displayName
 
         // Kullanıcının kendi ürünlerini görüntüleme sorgusu
         db.collection("products")
             .whereEqualTo("publisherUid", currentUserUid)
             .get()
             .addOnSuccessListener { querySnapshot ->
-                for (document in querySnapshot.documents) {
+                val productList = mutableListOf<Product>()
 
+                for (document in querySnapshot.documents) {
                     val productId = document.id
-                    val sellerUid = document.getString("sellerUid") ?: ""
+                    val publisherName = auth.currentUser?.displayName
+                    val publisherUid = document.getString("publisherUid") ?: ""
                     val productName = document.getString("productName") ?: ""
                     val description = document.getString("description") ?: ""
                     val imageUrl = document.getString("imageUrl") ?: ""
-                    val product = Product(productId, sellerUid, productName, description, imageUrl)
 
-                    products.add(product)
+                    val product = Product(productId, publisherUid,publisherName, productName, description, imageUrl)
+                    productList.add(product)
                 }
-                adapter.submitList(products)
+
+                // RecyclerView için adapter'a veriyi gönder
+                adapter.submitList(productList)
+
+                // Kullanıcı UID'sini göster
                 binding.uid.text = currentUserUid
             }
             .addOnFailureListener { e ->
@@ -99,7 +104,7 @@ class UserDashBoardFragment : Fragment() {
             .addOnSuccessListener {
                 Log.d(TAG, "Product deleted successfully")
                 // Ürün başarıyla silindiyse yapılacak işlemler
-                adapter.notifyDataSetChanged()
+                getAllProducts()
             }
             .addOnFailureListener { e ->
                 Log.w(TAG, "Error deleting product", e)

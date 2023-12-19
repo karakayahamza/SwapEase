@@ -9,4 +9,7 @@ class Message(
        val receiverUid: String,
        val text: String,
        val timestamp: Long
-):Parcelable
+):Parcelable{
+       // Add a no-argument constructor
+       constructor() : this("", "", "", 0L)
+}

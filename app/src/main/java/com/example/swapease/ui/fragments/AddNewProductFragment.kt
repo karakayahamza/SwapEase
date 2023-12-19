@@ -4,18 +4,17 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.example.swapease.R
+import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentAddNewProductBinding
 import com.example.swapease.ui.viewmodels.AddNewProductViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 
 class AddNewProductFragment : Fragment() {
     private var _binding: FragmentAddNewProductBinding? = null
@@ -54,20 +53,29 @@ class AddNewProductFragment : Fragment() {
         }
     }
 
-
     // Function to handle image selection
     private fun onImageSelected(uri: Uri) {
         // Upload image to Firebase Storage
         viewModel.uploadImageToFirebaseStorage(uri,
             onSuccess = { imageUrl ->
+                // Create a Product object with the necessary information
+                val product = Product(
+                    productId = null, // Bu değeri null olarak bıraktım, çünkü Firestore'da belirli bir belgenin ID'si genellikle belge eklenirken otomatik olarak atanır
+                    publisherUid = null,
+                    publisherName = null, // Bu değeri değiştirmeniz gerekiyor
+                    productName = binding.editTextProductName.text.toString(),
+                    description = binding.editTextDescription.text.toString(),
+                    imageUrl = imageUrl
+                )
+
                 // Add item to Firestore
-                viewModel.addItemToDatabase(
-                    binding.editTextProductName.text.toString(),
-                    binding.editTextDescription.text.toString(),
-                    imageUrl,
+                viewModel.addItemToDatabase(product,
                     onSuccess = {
                         // Actions to be performed in case of successful addition
                         Toast.makeText(requireContext(), "Item added successfully", Toast.LENGTH_SHORT).show()
+                        binding.editTextDescription.text.clear()
+                        binding.editTextProductName.text.clear()
+                        findNavController().navigate(R.id.action_addNewProductFragment_to_userMainScreenFragment)
                     },
                     onFailure = {
                         // Actions to be performed in case of failure
@@ -82,6 +90,7 @@ class AddNewProductFragment : Fragment() {
         )
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
@@ -90,9 +99,5 @@ class AddNewProductFragment : Fragment() {
             // Set the selected image URI to the ImageView
             binding.imageViewProduct.setImageURI(selectedImageUri)
         }
-    }
-
-    companion object {
-        const val TAG = "AddItemActivity"
     }
 }
