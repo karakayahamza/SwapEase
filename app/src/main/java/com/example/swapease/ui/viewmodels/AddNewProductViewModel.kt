@@ -12,9 +12,8 @@ import java.util.Locale
 
 class AddNewProductViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+    private val productsCollection = FirebaseFirestore.getInstance().collection("products")
     private val storage = FirebaseStorage.getInstance()
-    private val productsCollection = firestore.collection("products")
 
     fun uploadImageToFirebaseStorage(uri: Uri, onSuccess: (String) -> Unit, onFailure: () -> Unit) {
         val currentUserUid = auth.currentUser?.uid
@@ -56,7 +55,7 @@ class AddNewProductViewModel : ViewModel() {
             )
 
             productsCollection.add(productData)
-                .addOnSuccessListener { documentReference ->
+                .addOnSuccessListener {
                     onSuccess.invoke()
                 }
                 .addOnFailureListener {

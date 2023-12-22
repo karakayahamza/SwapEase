@@ -48,7 +48,7 @@ class AddNewProductFragment : Fragment() {
                 // Upload the selected image to Firebase Storage
                 onImageSelected(selectedImageUri!!)
             } else {
-                Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show()
+                showToastMessage("Please select an image")
             }
         }
     }
@@ -72,24 +72,23 @@ class AddNewProductFragment : Fragment() {
                 viewModel.addItemToDatabase(product,
                     onSuccess = {
                         // Actions to be performed in case of successful addition
-                        Toast.makeText(requireContext(), "Item added successfully", Toast.LENGTH_SHORT).show()
+                        showToastMessage("Item added successfully")
                         binding.editTextDescription.text.clear()
                         binding.editTextProductName.text.clear()
                         findNavController().navigate(R.id.action_addNewProductFragment_to_userMainScreenFragment)
                     },
                     onFailure = {
                         // Actions to be performed in case of failure
-                        Toast.makeText(requireContext(), "Error adding item", Toast.LENGTH_SHORT).show()
+                        showToastMessage("Error adding item")
                     }
                 )
             },
             onFailure = {
                 // Handle image upload failure
-                Toast.makeText(requireContext(), "Error uploading image", Toast.LENGTH_SHORT).show()
+                showToastMessage("Error uploading image")
             }
         )
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -99,5 +98,9 @@ class AddNewProductFragment : Fragment() {
             // Set the selected image URI to the ImageView
             binding.imageViewProduct.setImageURI(selectedImageUri)
         }
+    }
+
+    private fun showToastMessage(message:String){
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

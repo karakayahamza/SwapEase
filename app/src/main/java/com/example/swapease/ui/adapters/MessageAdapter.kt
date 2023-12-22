@@ -15,8 +15,8 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
     private val messages: MutableList<Pair<MessageType, Message>> = mutableListOf()
 
     enum class MessageType {
-        ME, // Mesaj gönderen kişi
-        OTHER // Diğer kişi
+        ME, // Message sent by the user
+        OTHER // Message sent by the other user
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
@@ -31,7 +31,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
                 val binding = ReceiveItemMessageBinding.inflate(inflater, parent, false)
                 MessageViewHolder.Other(binding)
             }
-            else -> throw IllegalArgumentException("Geçersiz görünüm türü")
+            else -> throw IllegalArgumentException("Invalid view type")
         }
     }
 
@@ -45,7 +45,6 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
 
     fun addMessage(type: MessageType, message: Message) {
         messages.add(type to message)
-        Log.d("type",type.name)
         notifyItemInserted(messages.size - 1)
     }
 
@@ -57,16 +56,11 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
     sealed class MessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         abstract fun bind(message: Pair<MessageType, Message>)
 
-
         class Me(private val binding: ItemMessageBinding) : MessageViewHolder(binding.root) {
             override fun bind(message: Pair<MessageType, Message>) {
-
-                println(message.first.ordinal.toString())
-                val dayMonthFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
-                val dayMonthString = dayMonthFormat.format(Date(message.second.timestamp))
-
-                val hourMinuteFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                val hourMinuteString = hourMinuteFormat.format(Date(message.second.timestamp))
+                // Bind data for messages sent by the user
+                val dayMonthString = formatDate(message.second.timestamp, "dd MMM")
+                val hourMinuteString = formatDate(message.second.timestamp, "HH:mm")
 
                 binding.textGchatDateMe.text = dayMonthString
                 binding.textGchatMessageMe.text = message.second.text
@@ -76,12 +70,9 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
 
         class Other(private val binding: ReceiveItemMessageBinding) : MessageViewHolder(binding.root) {
             override fun bind(message: Pair<MessageType, Message>) {
-                Log.d("KJKJKJKJKJ",message.second.text)
-                val dayMonthFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
-                val dayMonthString = dayMonthFormat.format(Date(message.second.timestamp))
-
-                val hourMinuteFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                val hourMinuteString = hourMinuteFormat.format(Date(message.second.timestamp))
+                // Bind data for messages sent by the other user
+                val dayMonthString = formatDate(message.second.timestamp, "dd MMM")
+                val hourMinuteString = formatDate(message.second.timestamp, "HH:mm")
 
                 binding.textGchatMessageOther.text = message.second.text
                 binding.textGchatDateOther.text = dayMonthString
@@ -89,27 +80,10 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
                 binding.textGchatUserOther.text = message.second.senderUserName
             }
         }
+        protected fun formatDate(timestamp: Long, format: String): String {
+            // Helper function to format date based on provided format
+            val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+            return dateFormat.format(Date(timestamp))
+        }
     }
 }
-
- private class MessageDiffCallback : DiffUtil.ItemCallback<Pair<MessageAdapter.MessageType, Message>>() {
-
-        override fun areItemsTheSame(
-            oldItem: Pair<MessageAdapter.MessageType, Message>,
-            newItem: Pair<MessageAdapter.MessageType, Message>
-        ): Boolean {
-            Log.d("ItemsID1", oldItem.second.messageId.toString())
-            Log.d("ItemsID2", newItem.second.messageId.toString())
-            Log.d("ItemsID","------------------------------")
-            return oldItem.second.messageId == newItem.second.messageId
-        }
-
-        override fun areContentsTheSame(
-            oldItem: Pair<MessageAdapter.MessageType, Message>,
-            newItem: Pair<MessageAdapter.MessageType, Message>
-        ): Boolean {
-            Log.d("Items",oldItem.second.text)
-            Log.d("Items",newItem.second.text)
-            return oldItem == newItem
-        }
- }

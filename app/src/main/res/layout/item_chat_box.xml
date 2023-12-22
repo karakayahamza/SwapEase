@@ -36,7 +36,7 @@
                     android:layout_height="100dp"
                     android:padding="5dp"
                     app:strokeWidth="2dp"
-                    app:strokeColor="@color/lavender"
+                    app:strokeColor="@color/default_border_color"
                     app:shapeAppearanceOverlay="@style/circleImageView"
                     android:src="@drawable/user_profile"
                     android:layout_margin="10dp"/>

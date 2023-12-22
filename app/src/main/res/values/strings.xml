@@ -8,7 +8,7 @@
     <string name="username">Username</string>
     <string name="password_rules">Your password must contain at least 1 uppercase letter, 1 lowercase letter and 1 number.</string>
     <string name="your_web_client_id">325351685098-0scjqbe7072545illckf7hk02vodrps9.apps.googleusercontent.com</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="forgot_password">Forgot password?</string>
+    <string name="google_sign_up">Google</string>
 </resources>

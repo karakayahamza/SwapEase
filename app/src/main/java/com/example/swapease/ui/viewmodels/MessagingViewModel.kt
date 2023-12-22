@@ -1,6 +1,5 @@
 package com.example.swapease.ui.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,12 +10,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 class MessagingViewModel : ViewModel() {
 
@@ -34,135 +29,112 @@ class MessagingViewModel : ViewModel() {
     private lateinit var chatId: String
 
     fun init(param1: Product?, param2: String?) {
-        userId = auth.currentUser?.uid ?: ""
-        otherUserId = param1?.publisherUid ?: splitChatIdTwoParts(param2)?.second ?: ""
+        userId = auth.currentUser?.uid.orEmpty()
+        otherUserId = param1?.publisherUid ?: splitChatIdTwoParts(param2)?.second.orEmpty()
         chatId = if (userId < otherUserId) "$userId-$otherUserId" else "$otherUserId-$userId"
 
+        createChatCollections(userId, otherUserId, chatId)
         observeChatMessages()
         fetchUserData(userId)
     }
 
-    fun addNewMessage(message: Message) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                firestore.collection("users")
-                    .document(userId)
-                    .collection("chats")
-                    .document(chatId)
-                    .collection("messages")
-                    .add(message)
-                    .await()
 
-                firestore.collection("users")
-                    .document(otherUserId)
-                    .collection("chats")
-                    .document(chatId)
-                    .collection("messages")
-                    .add(message)
-                    .await()
+    private fun createChatCollections(userId: String, otherUserId: String, chatId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Create the "chats" collection for the current user
+                firestore.collection("users").document(userId).collection("chats").document(chatId).set(mapOf("dummy" to "data")).await()
+
+                // Create the "chats" collection for the other user
+                firestore.collection("users").document(otherUserId).collection("chats").document(chatId).set(mapOf("dummy" to "data")).await()
+            } catch (e: Exception) {
+                println("Error creating chat collections: $e")
             }
         }
     }
 
-    fun fetchUserData(userId: String) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val document = firestore.collection("users")
-                        .document(userId)
-                        .get()
-                        .await()
 
-                    if (document.exists()) {
-                        _otherUserName.postValue(document.getString("username"))
-                    } else {
-                        println("Document not found or doesn't exist.")
-                    }
-                } catch (e: Exception) {
-                    println("Error fetching data: $e")
+    private fun addNewMessage(message: Message) {
+        viewModelScope.launch(Dispatchers.IO) {
+            firestore.collection("users").document(userId).collection("chats").document(chatId).collection("messages").add(message).await()
+            firestore.collection("users").document(otherUserId).collection("chats").document(chatId).collection("messages").add(message).await()
+        }
+    }
+
+    private fun fetchUserData(userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val document = firestore.collection("users").document(userId).get().await()
+
+                if (document.exists()) {
+                    _otherUserName.postValue(document.getString("username"))
+                } else {
+                    println("Document not found or doesn't exist.")
                 }
+            } catch (e: Exception) {
+                println("Error fetching data: $e")
             }
         }
     }
 
     fun sendMessage(messageText: String) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val newMessage = Message(userId, otherUserName.value.orEmpty(), otherUserId, messageText, System.currentTimeMillis(), null)
-                addNewMessage(newMessage)
-            }
+        viewModelScope.launch(Dispatchers.IO) {
+            val newMessage = Message(userId, otherUserName.value.orEmpty(), otherUserId, messageText, System.currentTimeMillis(), null)
+            addNewMessage(newMessage)
         }
     }
 
-    fun observeChatMessages() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                firestore.collection("users")
-                    .document(userId)
-                    .collection("chats")
-                    .document(chatId)
-                    .collection("messages")
-                    .orderBy("timestamp")
-                    .addSnapshotListener { snapshots, e ->
-                        if (e != null) {
-                            println(e)
-                            return@addSnapshotListener
-                        }
+    private fun observeChatMessages() {
+        viewModelScope.launch(Dispatchers.IO) {
+            firestore.collection("users").document(userId).collection("chats").document(chatId).collection("messages").orderBy("timestamp")
+                .addSnapshotListener { snapshots, e ->
+                    if (e != null) {
+                        println(e)
+                        return@addSnapshotListener
+                    }
 
-                        val messageList = mutableListOf<Pair<MessageAdapter.MessageType, Message>>()
+                    val messageList = mutableListOf<Pair<MessageAdapter.MessageType, Message>>()
 
-                        for (dc in snapshots?.documentChanges.orEmpty()) {
-                            when (dc.type) {
-                                DocumentChange.Type.ADDED -> {
-                                    val message = dc.document.toObject(Message::class.java)
-                                    message.messageId = dc.document.id
+                    for (dc in snapshots?.documentChanges.orEmpty()) {
+                        when (dc.type) {
+                            DocumentChange.Type.ADDED -> {
+                                val message = dc.document.toObject(Message::class.java).apply { messageId = dc.document.id }
 
-                                    if (message.senderUid == userId) {
-                                        messageList.add(MessageAdapter.MessageType.ME to message)
-                                    } else {
-                                        messageList.add(MessageAdapter.MessageType.OTHER to message)
-                                    }
+                                val messageType = if (message.senderUid == userId) {
+                                    MessageAdapter.MessageType.ME
+                                } else {
+                                    MessageAdapter.MessageType.OTHER
                                 }
-                                DocumentChange.Type.MODIFIED -> {
-                                    // Handle modified
-                                }
-                                DocumentChange.Type.REMOVED -> {
-                                    // Handle removed
-                                }
+
+                                messageList.add(messageType to message)
+                            }
+                            DocumentChange.Type.MODIFIED -> {
+                                // Handle modified
+                            }
+                            DocumentChange.Type.REMOVED -> {
+                                // Handle removed
                             }
                         }
-
-                        messageList.sortBy { it.second.timestamp }
-
-                        _messageList.postValue(messageList)
                     }
-            }
+
+                    messageList.sortBy { it.second.timestamp }
+                    _messageList.postValue(messageList)
+                }
         }
     }
 
-
     private fun splitChatIdTwoParts(data: String?): Pair<String, String>? {
-        var currentUserId = ""
-        var otherUserId = ""
-
-        val current = auth.currentUser?.uid
-
         data?.let { currentUserUid ->
             val parts = currentUserUid.split("-")
 
             if (parts.size == 2) {
-                val firstPart = parts[0]
-                val secondPart = parts[1]
+                val (firstPart, secondPart) = parts
 
-                if (firstPart == current) {
-                    currentUserId = firstPart
-                    otherUserId = secondPart
+                return if (firstPart == auth.currentUser?.uid) {
+                    Pair(firstPart, secondPart)
                 } else {
-                    currentUserId = secondPart
-                    otherUserId = firstPart
+                    Pair(secondPart, firstPart)
                 }
-
-                return Pair(currentUserId, otherUserId)
             } else {
                 println("Data could not be split into two parts.")
             }
@@ -171,3 +143,23 @@ class MessagingViewModel : ViewModel() {
         return null
     }
 }
+/*
+fun sksd(){
+    // Kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
+    val userChatsCollection = db.collection("users").document(userId).collection("chats").document(chatId)
+    userChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+// Diğer kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
+    val otherUserChatsCollection = db.collection("users").document(otherUserId).collection("chats").document(chatId)
+    otherUserChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+// Sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
+    val chatMessagesCollection = userChatsCollection.collection("messages")
+    chatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+// Diğer kullanıcının sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
+    val otherChatMessagesCollection = otherUserChatsCollection.collection("messages")
+    otherChatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+
+}*/
