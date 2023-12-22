@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_gchat_message_me"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="10dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textGchatDateMe">
+
+        <LinearLayout
+            android:id="@+id/layout_gchat_container_me"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_margin="5dp"
+                >
+
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/publisherImage"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:padding="5dp"
+                    app:strokeWidth="2dp"
+                    app:strokeColor="@color/lavender"
+                    app:shapeAppearanceOverlay="@style/circleImageView"
+                    android:src="@drawable/user_profile"
+                    android:layout_margin="10dp"/>
+
+               <TextView
+                   android:id="@+id/userName"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:text="User Name"
+                   android:textSize="25dp"
+                   android:layout_marginLeft="8dp"
+                   />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

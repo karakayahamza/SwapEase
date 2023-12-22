@@ -34,21 +34,18 @@
         android:name="com.example.swapease.ui.fragments.ProductDetailsFragment"
         android:label="fragment_product_details"
         tools:layout="@layout/fragment_product_details" >
-        <action
-            android:id="@+id/action_productDetailsFragment_to_chatFragment"
-            app:destination="@id/chatFragment" />
         <argument
             android:name="product"
             app:argType="com.example.swapease.data.models.Product" />
+        <action
+            android:id="@+id/action_productDetailsFragment_to_messagingFragment"
+            app:destination="@id/messagingFragment" />
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
         android:name="com.example.swapease.ui.fragments.ChatFragment"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat" >
-        <argument
-            android:name="product"
-            app:argType="com.example.swapease.data.models.Product" />
         <action
             android:id="@+id/action_chatFragment_to_messagingFragment"
             app:destination="@id/messagingFragment" />
@@ -59,7 +56,12 @@
         android:label="fragment_messaging"
         tools:layout="@layout/fragment_messaging" >
         <argument
-            android:name="chatBox"
+            android:name="product"
+            app:argType="com.example.swapease.data.models.Product"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="chatBoxId"
             app:argType="string"
             app:nullable="true"
             android:defaultValue="empty" />

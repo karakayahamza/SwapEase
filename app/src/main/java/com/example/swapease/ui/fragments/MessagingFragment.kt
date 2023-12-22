@@ -1,33 +1,35 @@
 package com.example.swapease.ui.fragments
 
+import MessageAdapter
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.swapease.data.models.Message
+import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentMessagingBinding
-import com.example.swapease.ui.adapters.MessageAdapter
+import com.example.swapease.ui.viewmodels.MessagingViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 
-private const val ARG_PARAM1 = "chatId"
+private const val ARG_PARAM1 = "product"
+private const val ARG_PARAM2 = "chatBoxId"
 class MessagingFragment : Fragment() {
     private var _binding: FragmentMessagingBinding? = null
     private val binding get() = _binding!!
-    private lateinit var firestore: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
-    private lateinit var messageAdapter: MessageAdapter
-    private lateinit var chatId: String
-    private var param1: String? = null
-
+    private var param1: Product? = null
+    private var param2 : String? = null
+    private lateinit var viewModel: MessagingViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-
+            param1 = it.getParcelable(ARG_PARAM1)
+            param2 = it.getString(ARG_PARAM2)
         }
     }
 
@@ -43,182 +45,39 @@ class MessagingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
-        // MessageAdapter'ı oluştur
-        messageAdapter = MessageAdapter()
+        viewModel = ViewModelProvider(this)[MessagingViewModel::class.java]
+        viewModel.init(param1, param2) // Make sure to pass the correct arguments here
 
+        // Set up RecyclerView and Adapter
+        val messageAdapter = MessageAdapter()
         binding.chatRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = messageAdapter
         }
 
-
-        val messageList = mutableListOf<Pair<MessageAdapter.MessageType, Message>>()
-
-        firestore = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
-
-        val userId = auth.currentUser?.uid
-        val otherUserId = "WM03Q5LdJ1QnUZ7US7jFSOC9TL03"
-
-        val result = splitChatIdTwoParts(param1)
-
-        result?.let { (first, second) ->
-            println("Current User ID: $first")
-            println("Other User ID: $second")
-        } ?: run {
-            println("Veri iki parçaya ayrılamadı veya hata oluştu.")
-        }
-
-
-        chatId = if (userId!! < otherUserId) "$userId-$otherUserId" else "$otherUserId-$userId"
-
-
-
-
-
-
-        val db = FirebaseFirestore.getInstance()
-
-// Kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
-        val userChatsCollection = db.collection("users").document(userId).collection("chats").document(chatId)
-        userChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-// Diğer kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
-        val otherUserChatsCollection = db.collection("users").document(otherUserId).collection("chats").document(chatId)
-        otherUserChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-// Sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
-        val chatMessagesCollection = userChatsCollection.collection("messages")
-        chatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-// Diğer kullanıcının sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
-        val otherChatMessagesCollection = otherUserChatsCollection.collection("messages")
-        otherChatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-
-
-        // Yeni bir mesaj eklemek için fonksiyon
-        fun addNewMessage(message: Message) {
-            // Firestore veritabanına yeni mesajı gönderen belgesine ekle
-            firestore.collection("users")
-                .document(userId)
-                .collection("chats")
-                .document(chatId)
-                .collection("messages")
-                .add(message)
-
-            // Firestore veritabanına yeni mesajı alıcı belgesine ekle
-            firestore.collection("users")
-                .document(otherUserId)
-                .collection("chats")
-                .document(chatId)
-                .collection("messages")
-                .add(message)
-        }
-
-        firestore.collection("users")
-            .document(userId)
-            .collection("chats")
-            .document(chatId)
-            .collection("messages")
-            .orderBy("timestamp")
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    // Hata durumunda işlemleri burada ele alabilirsiniz.
-                    println(e)
-                    return@addSnapshotListener
-                }
-
-                val messageList = mutableListOf<Pair<MessageAdapter.MessageType, Message>>() // Tüm mesajları içeren liste
-
-                for (dc in snapshots!!.documentChanges) {
-                    when (dc.type) {
-                        DocumentChange.Type.ADDED -> {
-                            // Yeni bir mesaj eklenirse
-                            val message = dc.document.toObject(Message::class.java)
-                            println("Message1: ${message.text}")
-
-                            if (message.senderUid == userId) {
-                                messageList.add(MessageAdapter.MessageType.ME to message)
-                            } else {
-                                println("Other")
-                                messageList.add(MessageAdapter.MessageType.OTHER to message)
-                            }
-                        }
-                        // Diğer durumlar da ele alınabilir (modified, removed, moved)
-                        DocumentChange.Type.MODIFIED -> TODO()
-                        DocumentChange.Type.REMOVED -> TODO()
-                    }
-                }
-
-                // Zaman damgasına göre mesajları sırala
-                messageList.sortBy { it.second.timestamp }
-
-                // Sıralanmış mesajları adaptera ekle
-                for (messageItem in messageList) {
-                    messageAdapter.addMessage(messageItem.first, messageItem.second)
-                }
-
-                // RecyclerView'yi güncelle
-                binding.chatRecyclerView.scrollToPosition(messageAdapter.itemCount - 1)
+        // Observe LiveData for chat messages
+        viewModel.messageList.observe(viewLifecycleOwner) { messageList ->
+            for (m in messageList){
+                 messageAdapter.addMessage(m.first,m.second)
             }
+            binding.chatRecyclerView.scrollToPosition(messageAdapter.itemCount - 1)
+        }
 
+        // Observe LiveData for other user's name
+        viewModel.otherUserName.observe(viewLifecycleOwner) { otherUserName ->
+            // Update UI with other user's name if needed
+            println(otherUserName)
+        }
+
+        // Send message button click listener
         binding.sendMessageButton.setOnClickListener {
             val messageText = binding.messageEditText.text.toString().trim()
             if (messageText.isNotEmpty()) {
-                val newMessage = Message(userId, otherUserId, messageText, System.currentTimeMillis())
-
-                // Yeni mesajı eklemek için fonksiyonu çağır
-                addNewMessage(newMessage)
-
+                viewModel.sendMessage(messageText)
                 binding.messageEditText.text.clear()
             }
         }
 
-
-    }
-
-
-
-    fun sortAllMessages(){
-
-    }
-
-    fun splitChatIdTwoParts(data: String?): Pair<String, String>? {
-        var currentUserId = ""
-        var otherUserId = ""
-
-        val parts = data?.split("-")
-
-        if (parts != null) {
-            if (parts.size == 2) {
-                val firstPart = parts[0]
-                val secondPart = parts[1]
-
-                println("First Part: $firstPart")
-                println("Second Part: $secondPart")
-
-                if (firstPart == auth.currentUser!!.uid) {
-                    currentUserId = firstPart
-                    otherUserId = secondPart
-                } else {
-                    currentUserId = secondPart
-                    otherUserId = firstPart
-                }
-
-                // Burada Pair'ı oluşturup döndür
-                return Pair(currentUserId, otherUserId)
-            } else {
-                println("Veri iki parçaya ayrılamadı.")
-            }
-        }
-
-        // Veri iki parçaya ayrılamazsa veya hata olursa null döndür
-        return null
-    }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
 

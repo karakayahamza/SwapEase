@@ -11,12 +11,15 @@ import com.example.swapease.R
 import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentChatBinding
 import com.example.swapease.databinding.FragmentProductDetailsBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 private const val ARG_PARAM1 = "product"
 class ProductDetailsFragment : Fragment() {
     private var _binding: FragmentProductDetailsBinding? = null
     private val binding get() = _binding!!
     private var param1: Product? = null
+    val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,26 +40,20 @@ class ProductDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val currentUserUid = auth.currentUser?.uid
+        val publisherUid = param1?.publisherUid?.toString()
+
+        if (publisherUid == currentUserUid) {
+            binding.goToChat.visibility = View.GONE
+        } else {
+            binding.goToChat.visibility = View.VISIBLE
+        }
 
         binding.goToChat.setOnClickListener {
-/*
-            val action = ProductDetailsFragmentDirections.actionProductDetailsFragmentToChatFragment(
-                param1!!
-            )
+
+            val action = ProductDetailsFragmentDirections.actionProductDetailsFragmentToMessagingFragment(param1!!)
             view.findNavController().navigate(action)
-*/
-
-  /*
-            println(param1!!.publisherUid.toString())
-            val action2 = ProductDetailsFragmentDirections.actionProductDetailsFragmentToMessagingFragment(
-                param1!!
-            )
-            view.findNavController().navigate(action2)
-*/
-
-            val action = ProductDetailsFragmentDirections.actionProductDetailsFragmentToChatFragment(param1!!)
-            view.findNavController().navigate(action)
-
+            //view.findNavController().popBackStack()
         }
         binding.textViewProductName.text = param1!!.productName
         binding.textViewDescription.text = param1!!.description
@@ -64,7 +61,6 @@ class ProductDetailsFragment : Fragment() {
             .load(param1!!.imageUrl)
             .into(binding.imageViewProduct)
     }
-
     companion object {
         @JvmStatic
         fun newInstance(param1: Product) =

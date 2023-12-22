@@ -55,6 +55,7 @@ class UserMainScreenFragment : Fragment() {
             override fun onItemClick(product: Product) {
                 val action = UserMainScreenFragmentDirections.actionUserMainScreenFragmentToProductDetailsFragment(product)
                 view?.findNavController()?.navigate(action)
+                //view?.findNavController()?.popBackStack()
             }
 
             override fun onItemLongClick(product: Product) {

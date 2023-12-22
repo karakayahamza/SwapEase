@@ -11,25 +11,19 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.swapease.ChatListAdapter
 import com.example.swapease.data.models.ChatBox
-import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentChatBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-private const val ARG_PARAM1 = "product"
 class ChatFragment : Fragment() {
     private var _binding: FragmentChatBinding? = null
     private val binding get() = _binding!!
-    private var param1: Product? = null
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var chatListAdapter: ChatListAdapter
     private val db = FirebaseFirestore.getInstance()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getParcelable(ARG_PARAM1)
-        }
     }
 
     override fun onCreateView(
@@ -47,48 +41,22 @@ class ChatFragment : Fragment() {
         firestore = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
-        param1?.publisherName
-        param1?.publisherUid
 
+        chatListAdapter = ChatListAdapter(object : ChatListAdapter.OnItemClickListener {
+            override fun onItemClick(chatBox: ChatBox) {
+                Log.d("ChatBoId",chatBox.chatBoxId)
+                val action = ChatFragmentDirections.actionChatFragmentToMessagingFragment(chatBoxId = chatBox.chatBoxId)
+                view.findNavController().navigate(action)
+            }
+        })
 
-        if (param1 == null){
-            println("Param1 : ${param1}")
-            chatListAdapter = ChatListAdapter(object : ChatListAdapter.OnItemClickListener {
-                override fun onItemClick(chatBox: ChatBox) {
-                    val action = ChatFragmentDirections.actionChatFragmentToMessagingFragment()
-                    view.findNavController().navigate(action)
-                }
-            })
+        binding.chats.layoutManager = LinearLayoutManager(requireContext())
+        binding.chats.adapter = chatListAdapter
 
-            binding.chats.layoutManager = LinearLayoutManager(requireContext())
-            binding.chats.adapter = chatListAdapter
-
-            getUserDataAndChats(auth.currentUser?.uid.toString())
-        }
-
-        else{
-            println("Param2 : $param1")
-            val action = ChatFragmentDirections.actionChatFragmentToMessagingFragment()
-            view.findNavController().navigate(action)
-        }
+        getUserDataAndChats(auth.currentUser?.uid.toString())
     }
 
-
     private fun getUserDataAndChats(userId:String){
-       /* val usersCollection = db.collection("users")
-        usersCollection.document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    val userName = document.getString("userName")
-
-                } else {
-                    println("Belge bulunamadı veya yok.")
-                }
-            }
-            .addOnFailureListener { exception ->
-                println("Veri alınırken hata oluştu: $exception")
-            }*/
 
         val userChatsCollection = db.collection("users").document(userId).collection("chats")
 

@@ -1,9 +1,12 @@
 package com.example.swapease.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -17,6 +20,7 @@ import com.example.swapease.ui.activities.LoginActivity
 import com.example.swapease.ui.adapters.ProductListAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 
 class UserDashBoardFragment : Fragment() {
@@ -26,7 +30,8 @@ class UserDashBoardFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val products: MutableList<Product> = mutableListOf()
-
+    private val PICK_IMAGE_REQUEST = 1
+    private var selectedImageUri: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -41,15 +46,15 @@ class UserDashBoardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-            val profileImageUrl: String? = auth.currentUser?.photoUrl?.toString()
 
             setupRecyclerView()
+            loadUserProfileImage()
 
-        if (!profileImageUrl.isNullOrEmpty()) {
-                Glide.with(requireContext())
-                    .load(profileImageUrl)
-                    .into(binding.profileImageView)
-            }
+        binding.profileImageView.setOnClickListener {
+            startImageSelection()
+        }
+
+
 
             binding.logoutButton.setOnClickListener {
                 FirebaseAuth.getInstance().signOut()
@@ -123,11 +128,16 @@ class UserDashBoardFragment : Fragment() {
             }
         })
 
-
         binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = adapter
 
         getAllProducts()
+    }
+
+    private fun loadUserProfileImage(profileImageUrl: String) {
+        Glide.with(requireContext())
+            .load(profileImageUrl)
+            .into(binding.profileImageView)
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -147,6 +157,73 @@ class UserDashBoardFragment : Fragment() {
             .show()
     }
 
+    private fun loadUserProfileImage() {
+        val currentUserUid = auth.currentUser?.uid
+        val userDocRef = db.collection("users").document(currentUserUid ?: "")
+
+        userDocRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val profileImageUrl = documentSnapshot.getString("userProfileImage")
+                    profileImageUrl?.let {
+                        loadUserProfileImage(it)
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Profil resmi çekme hatası", e)
+            }
+    }
+
+    private fun updateUserProfileImage(imageUrl: String) {
+        val userDocRef = db.collection("users").document(auth.currentUser?.uid ?: "")
+        userDocRef.update("userProfileImage", imageUrl)
+            .addOnSuccessListener {
+                Log.d(TAG, "Profil resmi güncelleme başarılı")
+                loadUserProfileImage(imageUrl)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Profil resmi güncelleme hatası", e)
+            }
+    }
+
+    private fun startImageSelection() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            selectedImageUri = data.data
+
+            // Seçilen resmi Firestore Storage'a yükle
+
+            selectedImageUri?.let { uploadImageToFirebaseStorage(it) }
+        }
+    }
+    private fun uploadImageToFirebaseStorage(imageUri: Uri) {
+        val storageRef = FirebaseStorage.getInstance().reference
+        val imageRef =
+            storageRef.child("profile_images/${FirebaseAuth.getInstance().currentUser?.uid}.jpg")
+
+        imageRef.putFile(imageUri)
+            .addOnSuccessListener { taskSnapshot ->
+                // Resim başarıyla yüklendiğinde yapılacak işlemleri buraya ekleyebilirsiniz
+                Log.d(TAG, "Resim yükleme başarılı: ${taskSnapshot.metadata?.path}")
+
+                // Yüklendikten sonra resmin URL'sini alabilir ve kullanıcı profilini güncelleyebilirsiniz
+                taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
+                    updateUserProfileImage(uri.toString())
+                }
+            }
+            .addOnFailureListener { e ->
+                // Yükleme başarısız olduğunda yapılacak işlemleri buraya ekleyebilirsiniz
+                Log.e(TAG, "Resim yükleme hatası", e)
+            }
+    }
     companion object {
         const val TAG = "AddItemActivity"
     }
