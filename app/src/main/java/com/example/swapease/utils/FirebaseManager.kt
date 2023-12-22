@@ -1,4 +1,4 @@
-package com.example.swapease.ui.utils
+package com.example.swapease.utils
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider

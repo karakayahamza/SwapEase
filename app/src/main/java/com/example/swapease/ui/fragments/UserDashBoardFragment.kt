@@ -54,8 +54,6 @@ class UserDashBoardFragment : Fragment() {
             startImageSelection()
         }
 
-
-
             binding.logoutButton.setOnClickListener {
                 FirebaseAuth.getInstance().signOut()
 
@@ -85,7 +83,7 @@ class UserDashBoardFragment : Fragment() {
                     val description = document.getString("description") ?: ""
                     val imageUrl = document.getString("imageUrl") ?: ""
 
-                    val product = Product(productId, publisherUid,publisherName, productName, description, imageUrl)
+                    val product = Product(productId, publisherUid,publisherName, productName, description,null, imageUrl)
                     productList.add(product)
                 }
 
@@ -158,21 +156,34 @@ class UserDashBoardFragment : Fragment() {
     }
 
     private fun loadUserProfileImage() {
-        val currentUserUid = auth.currentUser?.uid
-        val userDocRef = db.collection("users").document(currentUserUid ?: "")
+        // Get the current user and user UID
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val currentUserUid = currentUser?.uid
 
-        userDocRef.get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-                    val profileImageUrl = documentSnapshot.getString("userProfileImage")
-                    profileImageUrl?.let {
-                        loadUserProfileImage(it)
+        // Check if the current user has a photo URL
+        currentUser?.photoUrl?.let { photoUrl ->
+            // If a photo URL exists, load the user profile image
+            loadUserProfileImage(photoUrl.toString())
+        } ?: run {
+            // If the user doesn't have a photo URL, check the Firestore database for a custom profile image
+            val userDocRef = db.collection("users").document(currentUserUid ?: "")
+
+            userDocRef.get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+                        // Retrieve the custom profile image URL from Firestore
+                        val profileImageUrl = documentSnapshot.getString("userProfileImage")
+                        profileImageUrl?.let {
+                            // If a custom profile image URL exists, load the user profile image
+                            loadUserProfileImage(it)
+                        }
                     }
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Profil resmi çekme hatası", e)
-            }
+                .addOnFailureListener { e ->
+                    // Handle errors when fetching the profile image URL from Firestore
+                    Log.e(TAG, "Error fetching profile image", e)
+                }
+        }
     }
 
     private fun updateUserProfileImage(imageUrl: String) {

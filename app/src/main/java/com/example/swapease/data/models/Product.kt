@@ -10,8 +10,9 @@ data class Product(
     val publisherName: String?,
     val productName: String? = null,
     val description: String? = null,
+    val category: String? = null,
     val imageUrl: String? = null,
     val addedDate: String? = null
 ):Parcelable {
-    constructor() : this(productId = null, "","","","",null,"")
+    constructor() : this(productId = null, "","","","","",null,"")
 }

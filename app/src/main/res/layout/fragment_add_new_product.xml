@@ -11,59 +11,79 @@
 
     <ImageView
         android:id="@+id/imageViewProduct"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:src="@drawable/appicon"
-        android:scaleType="centerCrop"/>
+        android:layout_marginBottom="50dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/placeholder" />
 
-    <TextView
-        android:id="@+id/textViewProductName"
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/productNameTextInput"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_margin="5dp"
+        android:textColorHint="@color/lavender"
+        style="@style/MyOutlinedBox"
+        android:layout_below="@+id/imageViewProduct"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/productNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/lavender"
+            android:background="@null"
+            android:hint="Product Name"
+            android:gravity="center_vertical"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/productDescriptionTextInput"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_margin="5dp"
+        android:textColorHint="@color/lavender"
+        style="@style/MyOutlinedBox"
+        android:layout_below="@id/productNameTextInput"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/productDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/lavender"
+            android:background="@null"
+            android:hint="Product Description"
+            android:gravity="center_vertical"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Spinner
+        android:id="@+id/spinnerCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Product Name"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_below="@id/imageViewProduct"
+        android:layout_below="@id/productDescriptionTextInput"
+
+        android:layout_centerInParent="true"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"/>
-
-    <EditText
-        android:id="@+id/editTextProductName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/textViewProductName"
-        android:layout_marginBottom="16dp"
-        android:hint="Enter product name"/>
-
-
-    <TextView
-        android:id="@+id/textViewDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Description"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_below="@id/editTextProductName"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"/>
-
-    <EditText
-        android:id="@+id/editTextDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/textViewDescription"
-        android:layout_marginBottom="16dp"
-        android:hint="Enter product description"
-        android:inputType="textMultiLine"
-        android:minLines="3"/>
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/buttonAddProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editTextDescription"
+        android:layout_below="@id/spinnerCategories"
         android:layout_marginTop="24dp"
-        android:text="Add Product"/>
+        android:text="publish the Product"/>
 </RelativeLayout>

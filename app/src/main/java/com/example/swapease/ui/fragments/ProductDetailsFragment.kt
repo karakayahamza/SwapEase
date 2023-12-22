@@ -41,7 +41,7 @@ class ProductDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val currentUserUid = auth.currentUser?.uid
-        val publisherUid = param1?.publisherUid?.toString()
+        val publisherUid = param1?.publisherUid
 
         if (publisherUid == currentUserUid) {
             binding.goToChat.visibility = View.GONE
@@ -50,24 +50,13 @@ class ProductDetailsFragment : Fragment() {
         }
 
         binding.goToChat.setOnClickListener {
-
             val action = ProductDetailsFragmentDirections.actionProductDetailsFragmentToMessagingFragment(param1!!)
             view.findNavController().navigate(action)
-            //view.findNavController().popBackStack()
         }
         binding.textViewProductName.text = param1!!.productName
         binding.textViewDescription.text = param1!!.description
         Glide.with(requireContext())
             .load(param1!!.imageUrl)
             .into(binding.imageViewProduct)
-    }
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: Product) =
-            ProductDetailsFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable(ARG_PARAM1, param1)
-                }
-            }
     }
 }

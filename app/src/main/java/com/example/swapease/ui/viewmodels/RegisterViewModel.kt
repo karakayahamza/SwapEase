@@ -1,3 +1,5 @@
+package com.example.swapease.ui.viewmodels
+
 import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

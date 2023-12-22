@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:background="@color/white"
-                android:src="@drawable/sign_out"
+                android:src="@drawable/logout"
                 tools:ignore="TouchTargetSizeCheck" />
 
 

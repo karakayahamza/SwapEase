@@ -1,4 +1,4 @@
-package com.example.swapease.ui.utils
+package com.example.swapease.utils
 
 class Event<out T>(private val content: T) {
     var hasBeenHandled = false
