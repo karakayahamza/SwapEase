@@ -143,3 +143,23 @@ class MessagingViewModel : ViewModel() {
         return null
     }
 }
+/*
+fun sksd(){
+    // Kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
+    val userChatsCollection = db.collection("users").document(userId).collection("chats").document(chatId)
+    userChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+// Diğer kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
+    val otherUserChatsCollection = db.collection("users").document(otherUserId).collection("chats").document(chatId)
+    otherUserChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+// Sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
+    val chatMessagesCollection = userChatsCollection.collection("messages")
+    chatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+// Diğer kullanıcının sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
+    val otherChatMessagesCollection = otherUserChatsCollection.collection("messages")
+    otherChatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
+
+
+}*/
