@@ -1,8 +1,8 @@
-import android.util.Log
+package com.example.swapease.ui.adapters
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.swapease.data.models.Message
 import com.example.swapease.databinding.ItemMessageBinding
@@ -33,6 +33,11 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
             }
             else -> throw IllegalArgumentException("Invalid view type")
         }
+    }
+
+    override fun getItemId(position: Int): Long {
+        // messages listesinden belirli bir pozisyondaki mesajın messageId değerini kullanarak benzersiz bir kimlik oluştur
+        return messages[position].second.messageId?.hashCode()?.toLong() ?: 0L
     }
 
     override fun getItemCount(): Int = messages.size

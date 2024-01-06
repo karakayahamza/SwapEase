@@ -1,7 +1,6 @@
 package com.example.swapease.ui.viewmodels
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,8 +12,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class UserMainScreenViewModel : ViewModel() {
-    private val firestore = FirebaseFirestore.getInstance()
-    private val productsCollection = firestore.collection("products")
+    private val fireStore = FirebaseFirestore.getInstance()
+    private val productsCollection = fireStore.collection("products")
     private val _products = MutableLiveData<List<Product>>()
     val products: LiveData<List<Product>> get() = _products
     private val _errorEvent = MutableLiveData<Event<Exception>>()

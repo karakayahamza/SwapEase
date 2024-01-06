@@ -20,10 +20,6 @@ class UserMainScreenFragment : Fragment() {
     private lateinit var adapter: ProductListAdapter
     private val viewModel: UserMainScreenViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

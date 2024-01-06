@@ -138,8 +138,12 @@ class RegisterFragment : Fragment() {
             if (signInAccountTask.isSuccessful) {
                 val googleSignInAccount = signInAccountTask.getResult(ApiException::class.java)
                 if (googleSignInAccount != null) {
-                    val idToken = googleSignInAccount.idToken
-                    viewModel.signInWithGoogle(idToken,data)
+                    viewModel.signInWithGoogle(googleSignInAccount, {
+                        startDashboardActivity()
+                        displayToast(it)
+                    }, {
+                        displayToast(it)
+                    })
                 }
             } else {
                 displayToast("Invalid e-mail or password")
@@ -200,5 +204,4 @@ class RegisterFragment : Fragment() {
     private fun getColor(@ColorRes colorResId: Int): Int {
         return ContextCompat.getColor(requireContext(), colorResId)
     }
-
 }

@@ -16,8 +16,8 @@ class AddNewProductViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val productsCollection = FirebaseFirestore.getInstance().collection("products")
     private val storage = FirebaseStorage.getInstance()
-    val db = FirebaseFirestore.getInstance()
-    var userNameFromFirebase = ""
+    private val db = FirebaseFirestore.getInstance()
+    private var userNameFromFirebase = ""
 
     init {
         getUserName(auth.currentUser?.uid.toString()) { userName ->
@@ -61,7 +61,6 @@ class AddNewProductViewModel : ViewModel() {
         }
 
             Log.d("USERNAME ",userName)
-            Log.d("USERNAME ",userName)
 
         if (currentUserUid != null) {
             val productData = hashMapOf(
@@ -103,38 +102,4 @@ class AddNewProductViewModel : ViewModel() {
                 callback("Unknown")
             }
     }
-
-
-    /*
-    private fun updateProductList(
-        currentUserUid: String,
-        productId: String,
-        product: Product,
-        onSuccess: () -> Unit
-    ) {
-        // Kullanıcının mevcut ürün listesini alın
-        firestore.collection("users").document(currentUserUid)
-            .get()
-            .addOnSuccessListener { documentSnapshot ->
-                val user = documentSnapshot.toObject(User::class.java)
-                val productList = user?.products?.toMutableList() ?: mutableListOf()
-
-                // Yeni ürünü listeye ekleyin
-                val newProduct = Product(productId, currentUserUid, product.publisherName, product.productName, product.description, product.imageUrl,product.addedDate)
-                productList.add(newProduct)
-
-                // Güncellenmiş ürün listesini Firestore'a kaydedin
-                firestore.collection("users").document(currentUserUid)
-                    .update("products", productList)
-                    .addOnSuccessListener {
-                        onSuccess.invoke()
-                    }
-                    .addOnFailureListener {
-                        // Hata durumunda onFailure çağrılabilir
-                    }
-            }
-            .addOnFailureListener {
-                // Hata durumunda onFailure çağrılabilir
-            }
-    }*/
 }
