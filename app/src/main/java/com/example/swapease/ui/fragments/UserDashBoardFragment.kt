@@ -3,6 +3,7 @@ package com.example.swapease.ui.fragments
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,34 +13,45 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SwitchCompat
+import androidx.core.app.ActivityCompat.recreate
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.example.swapease.R
 import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentUserDashBoardBinding
 import com.example.swapease.ui.activities.LoginActivity
 import com.example.swapease.ui.adapters.ProductListAdapter
+import com.example.swapease.ui.viewmodels.UserDashBoardViewModel
+import com.example.swapease.utils.ThemePreferenceUtil
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 
 
 class UserDashBoardFragment : Fragment() {
+
     private var _binding: FragmentUserDashBoardBinding? = null
     private val binding get() = _binding!!
+    private lateinit var googleSignInClient: GoogleApiClient
+    private val viewModel: UserDashBoardViewModel by viewModels()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var adapter: ProductListAdapter
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
-    private val products: MutableList<Product> = mutableListOf()
     private val PICK_IMAGE_REQUEST = 1
     private var selectedImageUri: Uri? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private val themePreferenceUtil by lazy { ThemePreferenceUtil(requireContext()) }
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         _binding = FragmentUserDashBoardBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -47,80 +59,69 @@ class UserDashBoardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-            setupRecyclerView()
-            loadUserProfileImage()
+        loadDarkModeState()
+        setupRecyclerView()
+        observeViewModel()
+        loadUserProfile()
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.your_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleApiClient.Builder(requireContext())
+            .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+            .build()
+
+        googleSignInClient.connect()
 
         binding.profileImageView.setOnClickListener {
             startImageSelection()
         }
 
-            binding.logoutButton.setOnClickListener {
-                FirebaseAuth.getInstance().signOut()
+        binding.logoutButton.setOnClickListener {
+            logout()
+        }
+        binding.themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            saveDarkModeState(isChecked)
+            setAppTheme(isChecked)
+        }
 
-                val loginIntent = Intent(requireContext(), LoginActivity::class.java)
-                startActivity(loginIntent)
-
-                requireActivity().finish()
-            }
     }
-    private fun getAllProducts() {
-        // Kullanıcının UID'sini al
-        val currentUserUid = auth.currentUser?.uid
-        binding.userName.text = auth.currentUser?.displayName
 
-        // Kullanıcının kendi ürünlerini görüntüleme sorgusu
-        db.collection("products")
-            .whereEqualTo("publisherUid", currentUserUid)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val productList = mutableListOf<Product>()
 
-                for (document in querySnapshot.documents) {
-                    val productId = document.id
-                    val publisherName = auth.currentUser?.displayName
-                    val publisherUid = document.getString("publisherUid") ?: ""
-                    val productName = document.getString("productName") ?: ""
-                    val description = document.getString("description") ?: ""
-                    val imageUrl = document.getString("imageUrl") ?: ""
-
-                    val product = Product(productId, publisherUid,publisherName, productName, description,null, imageUrl)
-                    productList.add(product)
+    private fun logout() {
+        val account = GoogleSignIn.getLastSignedInAccount(requireContext())
+        if (account != null) {
+            Auth.GoogleSignInApi.revokeAccess(googleSignInClient).setResultCallback { status ->
+                if (status.isSuccess) {
+                    FirebaseAuth.getInstance().signOut()
+                    //Toast.makeText(requireContext(), "Logout successful", Toast.LENGTH_SHORT).show()
+                    navigateToLogin()
+                } else {
+                    //.makeText(requireContext(), "Logout failed", Toast.LENGTH_SHORT).show()
                 }
-
-                // RecyclerView için adapter'a veriyi gönder
-                adapter.submitList(productList)
-
-                // Kullanıcı UID'sini göster
-                binding.uid.text = currentUserUid
             }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error getting documents", e)
-                // Hata durumunda işlemleri gerçekleştir
-            }
+        } else {
+            FirebaseAuth.getInstance().signOut()
+            //Toast.makeText(requireContext(), "Logout successful", Toast.LENGTH_SHORT).show()
+            FirebaseAuth.getInstance().signOut()
+            navigateToLogin()
+        }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun deleteProduct(productId: String) {
-        db.collection("products")
-            .document(productId)
-            .delete()
-            .addOnSuccessListener {
-                Log.d(TAG, "Product deleted successfully")
-                // Ürün başarıyla silindiyse yapılacak işlemler
-                getAllProducts()
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error deleting product", e)
-                // Ürün silme başarısız olduysa yapılacak işlemler
-            }
+    private fun navigateToLogin() {
+        val loginIntent = Intent(requireActivity(), LoginActivity::class.java)
+        startActivity(loginIntent)
+        requireActivity().finish()
     }
-
 
     private fun setupRecyclerView() {
         adapter = ProductListAdapter(object : ProductListAdapter.OnItemClickListener {
             override fun onItemClick(product: Product) {
-
+                // Handle item click
             }
+
             override fun onItemLongClick(product: Product) {
                 showDeleteConfirmationDialog(product)
             }
@@ -128,24 +129,47 @@ class UserDashBoardFragment : Fragment() {
 
         binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = adapter
-
-        getAllProducts()
     }
 
-    private fun loadUserProfileImage(profileImageUrl: String) {
-        Glide.with(requireContext())
-            .load(profileImageUrl)
-            .into(binding.profileImageView)
+    private fun observeViewModel() {
+        viewModel.products.observe(viewLifecycleOwner, Observer { productList ->
+            binding.userName.text = auth.currentUser?.displayName
+            adapter.submitList(productList)
+        })
+
+        viewModel.statusMessage.observe(viewLifecycleOwner, Observer { message ->
+            // Handle status messages, e.g., show a Toast
+            //Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        })
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    private fun deleteProduct(productId: String) {
+        viewModel.deleteProduct(productId)
+    }
+
+    private fun loadUserProfile() {
+        viewModel.userProfileImage.observe(viewLifecycleOwner, Observer { imageUrl ->
+            Glide.with(requireContext())
+                .load(imageUrl)
+                .into(binding.profileImageView)
+        })
+
+        viewModel.user.observe(viewLifecycleOwner, Observer {
+
+            Log.d(TAG,"Swapes : ${it.completedSwapes.toString()} Rate: ${it.rating.toString()}")
+            binding.competedSwapes.text = it.completedSwapes.toString()
+            binding.rating.text = it.rating.toString()
+
+
+        })
+
+    }
+
     private fun showDeleteConfirmationDialog(product: Product) {
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Delete Product")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Product")
             .setMessage("Are you sure you want to delete this product?")
             .setPositiveButton("Delete") { _, _ ->
-                products.remove(product)
-                adapter.notifyDataSetChanged()
                 deleteProduct(product.productId.toString())
             }
             .setNegativeButton("Cancel") { dialog, _ ->
@@ -155,49 +179,7 @@ class UserDashBoardFragment : Fragment() {
             .show()
     }
 
-    private fun loadUserProfileImage() {
-        // Get the current user and user UID
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val currentUserUid = currentUser?.uid
-
-        // Check if the current user has a photo URL
-        currentUser?.photoUrl?.let { photoUrl ->
-            // If a photo URL exists, load the user profile image
-            loadUserProfileImage(photoUrl.toString())
-        } ?: run {
-            // If the user doesn't have a photo URL, check the Firestore database for a custom profile image
-            val userDocRef = db.collection("users").document(currentUserUid ?: "")
-
-            userDocRef.get()
-                .addOnSuccessListener { documentSnapshot ->
-                    if (documentSnapshot.exists()) {
-                        // Retrieve the custom profile image URL from Firestore
-                        val profileImageUrl = documentSnapshot.getString("userProfileImage")
-                        profileImageUrl?.let {
-                            // If a custom profile image URL exists, load the user profile image
-                            loadUserProfileImage(it)
-                        }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    // Handle errors when fetching the profile image URL from Firestore
-                    Log.e(TAG, "Error fetching profile image", e)
-                }
-        }
-    }
-
-    private fun updateUserProfileImage(imageUrl: String) {
-        val userDocRef = db.collection("users").document(auth.currentUser?.uid ?: "")
-        userDocRef.update("userProfileImage", imageUrl)
-            .addOnSuccessListener {
-                Log.d(TAG, "Profil resmi güncelleme başarılı")
-                loadUserProfileImage(imageUrl)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Profil resmi güncelleme hatası", e)
-            }
-    }
-
+    @SuppressLint("IntentReset")
     private fun startImageSelection() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         intent.type = "image/*"
@@ -210,33 +192,37 @@ class UserDashBoardFragment : Fragment() {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
             selectedImageUri = data.data
 
-            // Seçilen resmi Firestore Storage'a yükle
-
-            selectedImageUri?.let { uploadImageToFirebaseStorage(it) }
+            selectedImageUri?.let { viewModel.uploadImageToFirebaseStorage(it) }
         }
     }
-    private fun uploadImageToFirebaseStorage(imageUri: Uri) {
-        val storageRef = FirebaseStorage.getInstance().reference
-        val imageRef =
-            storageRef.child("profile_images/${FirebaseAuth.getInstance().currentUser?.uid}.jpg")
 
-        imageRef.putFile(imageUri)
-            .addOnSuccessListener { taskSnapshot ->
-                // Resim başarıyla yüklendiğinde yapılacak işlemleri buraya ekleyebilirsiniz
-                Log.d(TAG, "Resim yükleme başarılı: ${taskSnapshot.metadata?.path}")
-
-                // Yüklendikten sonra resmin URL'sini alabilir ve kullanıcı profilini güncelleyebilirsiniz
-                taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
-                    updateUserProfileImage(uri.toString())
-                }
-            }
-            .addOnFailureListener { e ->
-                // Yükleme başarısız olduğunda yapılacak işlemleri buraya ekleyebilirsiniz
-                Log.e(TAG, "Resim yükleme hatası", e)
-            }
+    private fun saveDarkModeState(isDarkModeEnabled: Boolean) {
+        themePreferenceUtil.setThemeMode(if (isDarkModeEnabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
     }
+
+    private fun loadDarkModeState() {
+        val isDarkModeEnabled = themePreferenceUtil.getThemeMode() == AppCompatDelegate.MODE_NIGHT_YES
+        binding.themeSwitch.isChecked = isDarkModeEnabled
+        setAppTheme(isDarkModeEnabled)
+    }
+
+    private fun setAppTheme(isDarkModeEnabled: Boolean) {
+        val themeMode = if (isDarkModeEnabled) {
+            AppCompatDelegate.MODE_NIGHT_YES
+        } else {
+            AppCompatDelegate.MODE_NIGHT_NO
+        }
+        themePreferenceUtil.setThemeMode(themeMode)
+
+        AppCompatDelegate.setDefaultNightMode(themeMode)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     companion object {
-        const val TAG = "AddItemActivity"
+        const val TAG = "UserDashboardFragment"
     }
-
 }

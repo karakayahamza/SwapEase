@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.swapease.data.models.User
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,7 +19,7 @@ import kotlin.Result
 class RegisterViewModel : ViewModel() {
 
     private val firebaseAuth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+    private val fireStore = FirebaseFirestore.getInstance()
 
     private val _registrationResult = MutableLiveData<Result<String>>()
     val registrationResult: LiveData<Result<String>> get() = _registrationResult
@@ -30,8 +32,8 @@ class RegisterViewModel : ViewModel() {
             try {
                 firebaseAuth.createUserWithEmailAndPassword(email, password).await()
                 val userId = firebaseAuth.currentUser?.uid ?: ""
-                val newUser = User(uid = userId, username = username, email = email, null)
-                firestore.collection("users").document(userId).set(newUser).await()
+                val newUser = User(uid = userId, username = username, email = email, null,0,0.0)
+                fireStore.collection("users").document(userId).set(newUser).await()
                 sendVerificationEmail()
                 _registrationResult.value = Result.success("Registration successful")
             } catch (e: Exception) {
@@ -40,25 +42,29 @@ class RegisterViewModel : ViewModel() {
         }
     }
 
-    fun signInWithGoogle(idToken: String?,data: Intent?) {
-        viewModelScope.launch {
-            try {
-                val credential = GoogleAuthProvider.getCredential(idToken, null)
-                firebaseAuth.signInWithCredential(credential).await()
 
-                val googleSignInAccount = GoogleSignIn.getSignedInAccountFromIntent(data).await()
-                val userId = firebaseAuth.currentUser?.uid ?: ""
-                val username = googleSignInAccount.displayName ?: ""
-                val email = googleSignInAccount.email ?: ""
-                val newUser = User(uid = userId, username = username, email = email, null)
+    fun signInWithGoogle(account: GoogleSignInAccount, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        val authCredential: AuthCredential = GoogleAuthProvider.getCredential(account.idToken, null)
+        firebaseAuth.signInWithCredential(authCredential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = firebaseAuth.currentUser?.uid ?: ""
+                    val username = account.displayName ?: ""
+                    val email = account.email ?: ""
+                    val newUser = User(uid = userId, username = username, email = email, null,0,0.0)
 
-                firestore.collection("users").document(userId).set(newUser).await()
-
-                _googleSignInResult.value = Result.success("Google Sign-In successful")
-            } catch (e: Exception) {
-                _googleSignInResult.value = Result.failure(e)
+                    fireStore.collection("users").document(userId)
+                        .set(newUser)
+                        .addOnSuccessListener {
+                            onSuccess.invoke("Sign-in succesfull")
+                        }
+                        .addOnFailureListener {
+                            onFailure.invoke("Failed to add user to Firestore: ${it.message}")
+                        }
+                } else {
+                    onFailure.invoke("Authentication Failed: ${task.exception?.message}")
+                }
             }
-        }
     }
 
     private suspend fun sendVerificationEmail() {

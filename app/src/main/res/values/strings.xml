@@ -3,8 +3,6 @@
     <string name="Email">Email</string>
     <string name="Password">Create Password</string>
     <string name="confirmPassword">Confirm Password</string>
-    <string name="cikisyap">Çıkış Yap</string>
-    <string name="kullaniciSil">Kullanıcıyı Sil</string>
     <string name="username">Username</string>
     <string name="password_rules">Your password must contain at least 1 uppercase letter, 1 lowercase letter and 1 number.</string>
     <string name="your_web_client_id">325351685098-0scjqbe7072545illckf7hk02vodrps9.apps.googleusercontent.com</string>
@@ -26,8 +24,4 @@
         <item>Home Electronics</item>
         <item>Gift Products</item>
     </string-array>
-
-
-
-
 </resources>

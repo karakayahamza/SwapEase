@@ -1,17 +1,40 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
 
     <style name="Theme.SwapEase" parent="Theme.MaterialComponents.Light.NoActionBar">
+
         <item name="colorPrimary">@color/lavender</item>
+        <item name="colorPrimaryDark">#5F6CBF</item>
+        <item name="colorAccent">#A3B8FF</item>
+
+        <item name="android:windowBackground">#F2F4F6</item>
+
         <item name="colorPrimaryVariant">@color/lavender</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+        <item name="colorControlNormal">@color/lavender</item>
+        <item name="colorControlHighlight">@color/lavender</item>
+        <item name="colorControlActivated">@color/lavender</item>
+        <item name="colorButtonNormal">@color/white</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem</item>
 
+    </style>
 
+    <style name="SpinnerDropDownItem" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <!-- Açılan itemlerin metin renkleri için özel ayarlar -->
+        <item name="android:textColor">@color/lavender</item>
+    </style>
+    <style name="SpinnerItem" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <!-- Spinner içindeki metin renkleri için özel ayarlar -->
+        <item name="android:textColor">@color/lavender</item>
+    </style>
+
+    <style name="MyTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/lavender</item>
     </style>
 
     <style name="MyOutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -30,8 +53,24 @@
     </style>
 
 
+
+    <item name="customColor" type="color">#F2F4F6</item>
+
     <style name="circleImageView" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+
+
+    <color name="colorPrimary">@color/lavender</color>
+    <color name="colorPrimaryDark">#5F6CBF</color>
+    <color name="colorAccent">#A3B8FF</color>
+    <color name="windowBackground">#F2F4F6</color>
+    <color name="colorPrimaryVariant">@color/lavender</color>
+    <color name="colorOnPrimary">@color/white</color>
+    <color name="colorControlNormal">@color/lavender</color>
+    <color name="colorControlHighlight">@color/lavender</color>
+    <color name="colorControlActivated">@color/lavender</color>
+    <color name="colorButtonNormal">@color/white</color>
+
 </resources>

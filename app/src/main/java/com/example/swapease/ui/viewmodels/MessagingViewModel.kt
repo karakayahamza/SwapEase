@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.swapease.data.models.Message
 import com.example.swapease.data.models.Product
+import com.example.swapease.ui.adapters.MessageAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,14 +15,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class MessagingViewModel : ViewModel() {
-
     private val _messageList = MutableLiveData<List<Pair<MessageAdapter.MessageType, Message>>>()
     val messageList: LiveData<List<Pair<MessageAdapter.MessageType, Message>>> get() = _messageList
 
     private val _otherUserName = MutableLiveData<String>()
     val otherUserName: LiveData<String> get() = _otherUserName
 
-    private val firestore = FirebaseFirestore.getInstance()
+    private val fireStore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
     private lateinit var userId: String
@@ -38,33 +38,31 @@ class MessagingViewModel : ViewModel() {
         fetchUserData(userId)
     }
 
-
     private fun createChatCollections(userId: String, otherUserId: String, chatId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 // Create the "chats" collection for the current user
-                firestore.collection("users").document(userId).collection("chats").document(chatId).set(mapOf("dummy" to "data")).await()
+                fireStore.collection("users").document(userId).collection("chats").document(chatId).set(mapOf("dummy" to "data")).await()
 
                 // Create the "chats" collection for the other user
-                firestore.collection("users").document(otherUserId).collection("chats").document(chatId).set(mapOf("dummy" to "data")).await()
+                fireStore.collection("users").document(otherUserId).collection("chats").document(chatId).set(mapOf("dummy" to "data")).await()
             } catch (e: Exception) {
                 println("Error creating chat collections: $e")
             }
         }
     }
 
-
     private fun addNewMessage(message: Message) {
         viewModelScope.launch(Dispatchers.IO) {
-            firestore.collection("users").document(userId).collection("chats").document(chatId).collection("messages").add(message).await()
-            firestore.collection("users").document(otherUserId).collection("chats").document(chatId).collection("messages").add(message).await()
+            fireStore.collection("users").document(userId).collection("chats").document(chatId).collection("messages").add(message).await()
+            fireStore.collection("users").document(otherUserId).collection("chats").document(chatId).collection("messages").add(message).await()
         }
     }
 
     private fun fetchUserData(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val document = firestore.collection("users").document(userId).get().await()
+                val document = fireStore.collection("users").document(userId).get().await()
 
                 if (document.exists()) {
                     _otherUserName.postValue(document.getString("username"))
@@ -86,7 +84,7 @@ class MessagingViewModel : ViewModel() {
 
     private fun observeChatMessages() {
         viewModelScope.launch(Dispatchers.IO) {
-            firestore.collection("users").document(userId).collection("chats").document(chatId).collection("messages").orderBy("timestamp")
+            fireStore.collection("users").document(userId).collection("chats").document(chatId).collection("messages").orderBy("timestamp")
                 .addSnapshotListener { snapshots, e ->
                     if (e != null) {
                         println(e)
@@ -139,27 +137,6 @@ class MessagingViewModel : ViewModel() {
                 println("Data could not be split into two parts.")
             }
         }
-
         return null
     }
 }
-/*
-fun sksd(){
-    // Kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
-    val userChatsCollection = db.collection("users").document(userId).collection("chats").document(chatId)
-    userChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-// Diğer kullanıcının sohbet koleksiyonunu oluştur (Eğer yoksa)
-    val otherUserChatsCollection = db.collection("users").document(otherUserId).collection("chats").document(chatId)
-    otherUserChatsCollection.set(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-// Sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
-    val chatMessagesCollection = userChatsCollection.collection("messages")
-    chatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-// Diğer kullanıcının sohbet koleksiyonunun içine mesaj koleksiyonunu oluştur (Eğer yoksa)
-    val otherChatMessagesCollection = otherUserChatsCollection.collection("messages")
-    otherChatMessagesCollection.add(hashMapOf<String, Any>()) // Boş bir belge ekleyebilirsiniz
-
-
-}*/

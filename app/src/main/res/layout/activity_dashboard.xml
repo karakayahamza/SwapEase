@@ -8,7 +8,7 @@
     tools:context=".ui.activities.DashboardActivity">
 
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
@@ -17,6 +17,7 @@
         app:navGraph="@navigation/dashboard_nav_graph"
         android:layout_above="@+id/bottom_nav" />
 
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
@@ -24,5 +25,5 @@
         android:layout_alignParentBottom="true"
         app:menu="@menu/menu"
         app:itemIconTint="@color/lavender"
-        />
+        tools:ignore="VisualLintBottomNav" />
 </RelativeLayout>

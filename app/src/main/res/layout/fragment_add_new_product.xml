@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:padding="8dp"
     android:gravity="center"
-    tools:context=".ui.fragments.AddNewProductFragment">
+    tools:context=".ui.fragments.AddNewProductFragment"
+    tools:ignore="ScrollViewCount">
 
 
     <ImageView
@@ -25,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_margin="5dp"
+        android:minHeight="20dp"
         android:textColorHint="@color/lavender"
         style="@style/MyOutlinedBox"
         android:layout_below="@+id/imageViewProduct"
@@ -49,6 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_margin="5dp"
+        android:minHeight="20dp"
         android:textColorHint="@color/lavender"
         style="@style/MyOutlinedBox"
         android:layout_below="@id/productNameTextInput"
@@ -67,7 +70,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Spinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spinnerCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -75,15 +78,18 @@
 
         android:layout_centerInParent="true"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="46dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:minHeight="48dp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/buttonAddProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/spinnerCategories"
         android:layout_marginTop="24dp"
-        android:text="publish the Product"/>
+        android:text="Publish the Product"
+        android:textColor="@color/colorOnPrimary"
+        android:background="@color/colorPrimary"/>
 </RelativeLayout>

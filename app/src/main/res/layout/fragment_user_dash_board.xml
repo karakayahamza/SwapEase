@@ -6,9 +6,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_gravity="center"
     android:padding="10dp"
     tools:context=".ui.fragments.UserDashBoardFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <!-- ImageButton sağda yerleştir -->
+        <ImageView
+            android:id="@+id/logoutButton"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:background="@drawable/circular_grey_bordersolid"
+            android:src="@drawable/logout"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/themeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+    </LinearLayout>
 
 
         <LinearLayout
@@ -18,18 +40,6 @@
             android:paddingLeft="20dp"
             android:paddingTop="10dp"
             android:paddingRight="20dp">
-
-            <!--Top Profile Section -->
-
-            <ImageButton
-                android:id="@+id/logoutButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:background="@color/white"
-                android:src="@drawable/logout"
-                tools:ignore="TouchTargetSizeCheck" />
-
 
 
             <LinearLayout
@@ -76,14 +86,6 @@
                         android:textSize="21sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/uid"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="User UID"
-                        android:textSize="14sp" />
-
-
                 </LinearLayout>
 
 
@@ -105,7 +107,7 @@
                             android:layout_height="35dp"
                             android:background="@drawable/circular_grey_bordersolid"
                             android:padding="10dp"
-                            android:src="@drawable/tickinsidecircle" />
+                            android:src="@drawable/check" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -114,19 +116,13 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/competedSwapes"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="10"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:textColor="@color/lavender"
-                                android:text="Completed Swapes"
-                                android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -142,7 +138,7 @@
                             android:layout_height="35dp"
                             android:background="@drawable/circular_grey_bordersolid"
                             android:padding="10dp"
-                            android:src="@drawable/star" />
+                            android:src="@drawable/rate" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -151,19 +147,13 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/rating"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="4.8/5"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="ratings"
-                                android:textColor="@color/lavender"
-                                android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
 

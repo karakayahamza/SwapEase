@@ -1,14 +1,11 @@
 package com.example.swapease.ui.fragments
 
-import MessageAdapter
-import android.content.Context
+import com.example.swapease.ui.adapters.MessageAdapter
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.swapease.data.models.Product
@@ -22,6 +19,7 @@ class MessagingFragment : Fragment() {
     private val binding get() = _binding!!
     private var param1: Product? = null
     private var param2 : String? = null
+
     private lateinit var viewModel: MessagingViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,14 +40,13 @@ class MessagingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         viewModel = ViewModelProvider(this)[MessagingViewModel::class.java]
         viewModel.init(param1, param2) // Make sure to pass the correct arguments here
 
         // Set up RecyclerView and Adapter
         val messageAdapter = MessageAdapter()
         binding.chatRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = messageAdapter
         }
 
@@ -67,14 +64,18 @@ class MessagingFragment : Fragment() {
             println(otherUserName)
         }
 
-        // Send message button click listener
-        binding.sendMessageButton.setOnClickListener {
+        binding.productNameTextInput.setEndIconOnClickListener {
             val messageText = binding.messageEditText.text.toString().trim()
             if (messageText.isNotEmpty()) {
                 viewModel.sendMessage(messageText)
-                binding.messageEditText.text.clear()
+                binding.messageEditText.text?.clear()
             }
         }
-
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // RecyclerView temizleme
+        binding.chatRecyclerView.adapter = null
+        _binding = null
     }
 }

@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="8dp"
     app:cardCornerRadius="8dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,39 +22,41 @@
             android:src="@drawable/appicon" />
 
         <TextView
+            android:id="@+id/updatedDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Uploaded on December 8"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            />
+
+        <TextView
             android:id="@+id/textViewProductName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:text="Product Name"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:textSize="18sp"
-            android:textStyle="bold" />
-
-
-        <TextView
-            android:id="@+id/textViewDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Product Description"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/publisherName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Publisher Name"
+            android:textStyle="bold"
             />
 
+
+
         <TextView
-            android:id="@+id/date"
+            android:id="@+id/category"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Date:"
-            android:textSize="12dp"
-            android:gravity="right"
+            android:layout_height="match_parent"
+            android:text="Category"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="15sp"
             />
 
-    </LinearLayout>
+
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
