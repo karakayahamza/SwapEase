@@ -4,30 +4,45 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.example.swapease.R
+import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentAddNewProductBinding
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.example.swapease.ui.viewmodels.AddNewProductViewModel
 
 class AddNewProductFragment : Fragment() {
     private var _binding: FragmentAddNewProductBinding? = null
     private val binding get() = _binding!!
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
     private val PICK_IMAGE_REQUEST = 1
     private var selectedImageUri: Uri? = null
+    private val viewModel: AddNewProductViewModel by viewModels()
+    private lateinit var categories: Array<String>
+    lateinit var selectedCategory: String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        categories = resources.getStringArray(R.array.category_array)
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAddNewProductBinding.inflate(inflater, container, false)
+
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categories)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerCategories.adapter = adapter
+
         return binding.root
     }
 
@@ -45,56 +60,62 @@ class AddNewProductFragment : Fragment() {
             // Check if an image is selected
             if (selectedImageUri != null) {
                 // Upload the selected image to Firebase Storage
-                uploadImageToFirebaseStorage(selectedImageUri!!)
+                onImageSelected(selectedImageUri!!)
             } else {
-                Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show()
+                showToastMessage("Please select an image")
             }
         }
+
+        binding.spinnerCategories.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parentView: AdapterView<*>?, selectedItemView: View?, position: Int, id: Long) {
+                // Get the selected category and notify the user
+                selectedCategory = categories[position]
+                //Toast.makeText(requireContext(), "Selected Category: $selectedCategory", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onNothingSelected(parentView: AdapterView<*>?) {
+                selectedCategory = "Other"
+            }
+        }
+
     }
 
-    private fun uploadImageToFirebaseStorage(uri: Uri) {
-        val currentUserUid = auth.currentUser?.uid
-        if (currentUserUid != null) {
-            // Upload the image to Firebase Storage
-            val storageRef = FirebaseStorage.getInstance().reference
-            val imageRef =
-                storageRef.child("images/${currentUserUid}_${System.currentTimeMillis()}")
-            val uploadTask = imageRef.putFile(uri)
+    // Function to handle image selection
+    private fun onImageSelected(uri: Uri) {
+        // Upload image to Firebase Storage
+        viewModel.uploadImageToFirebaseStorage(uri,
+            onSuccess = { imageUrl ->
+                // Create a Product object with the necessary information
+                val product = Product(
+                    productId = null, // Bu değeri null olarak bıraktım, çünkü Firestore'da belirli bir belgenin ID'si genellikle belge eklenirken otomatik olarak atanır
+                    publisherUid = null,
+                    publisherName = null, // Bu değeri değiştirmeniz gerekiyor
+                    productName = binding.productNameText.text.toString(),
+                    description = binding.productDescription.text.toString(),
+                    category = selectedCategory,
+                    imageUrl = imageUrl
+                )
 
-            uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let {
-                        throw it
+                // Add item to Firestore
+                viewModel.addItemToDatabase(product,
+                    onSuccess = {
+                        // Actions to be performed in case of successful addition
+                        showToastMessage("Item added successfully")
+                        binding.productNameText.text?.clear()
+                        binding.productDescription.text?.clear()
+                        findNavController().navigate(R.id.action_addNewProductFragment_to_userMainScreenFragment)
+                    },
+                    onFailure = {
+                        // Actions to be performed in case of failure
+                        showToastMessage("Error adding item")
                     }
-                }
-                // If the image upload is successful, get the download URL of the image
-                imageRef.downloadUrl
-            }.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val imageUrl = task.result.toString()
-                    // After the image is uploaded, add other product details to the database
-                    addItemToDatabase(
-                        binding.editTextProductName.text.toString(),
-                        binding.editTextDescription.text.toString(),
-                        imageUrl
-                    )
-                } else {
-                    // If image upload fails, inform the user
-                    Toast.makeText(
-                        requireContext(),
-                        "Error uploading image",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }.addOnFailureListener { e ->
-                Log.e(TAG, "Error uploading image", e)
-                Toast.makeText(
-                    requireContext(),
-                    "Error uploading image: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                )
+            },
+            onFailure = {
+                // Handle image upload failure
+                showToastMessage("Error uploading image")
             }
-        }
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -107,40 +128,7 @@ class AddNewProductFragment : Fragment() {
         }
     }
 
-    private fun addItemToDatabase(productName: String, description: String, imageUrl: String) {
-        // Get the user's UID
-        val currentUserUid = auth.currentUser?.uid
-
-        // If the user's UID is not null, add the item to the database
-        if (currentUserUid != null) {
-            val product = hashMapOf(
-                "sellerUid" to currentUserUid,
-                "productName" to productName,
-                "description" to description,
-                "imageUrl" to imageUrl
-            )
-
-            db.collection("products")
-                .add(product)
-                .addOnSuccessListener { documentReference ->
-                    Log.d(TAG, "Item added with ID: ${documentReference.id}")
-                    // Actions to be performed in case of successful addition
-                    Toast.makeText(requireContext(), "Item added successfully", Toast.LENGTH_SHORT)
-                        .show()
-
-                }
-                .addOnFailureListener { e ->
-                    Log.w(TAG, "Error adding item", e)
-                    // Actions to be performed in case of failure
-                    Toast.makeText(requireContext(), "Error adding item", Toast.LENGTH_SHORT).show()
-                }
-        } else {
-            // If the user is not authenticated, show an error message
-            Toast.makeText(requireContext(), "User not authenticated", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    companion object {
-        const val TAG = "AddItemActivity"
+    private fun showToastMessage(message:String){
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

@@ -1,15 +1,18 @@
 package com.example.swapease.data.models
 
-import com.google.firebase.firestore.PropertyName
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-class Message (
-       @get:PropertyName("senderUid") // veya @PropertyName("senderUid")
-       val senderUid: String = "",
-       @get:PropertyName("receiverUid") // veya @PropertyName("receiverUid")
-       val receiverUid: String = "",
-       @get:PropertyName("text") // veya @PropertyName("text")
-       val text: String = "",
-       @get:PropertyName("timestamp") // veya @PropertyName("timestamp")
-       val timestamp: Long = 0
+@Parcelize
+class Message(
+       val senderUid: String,
+       val senderUserName : String,
+       val receiverUid: String,
+       val text: String,
+       val timestamp: Long,
+       var messageId: String?,
 
-)
+):Parcelable{
+       // Add a no-argument constructor
+       constructor() : this("","","", "", 0L,null)
+}

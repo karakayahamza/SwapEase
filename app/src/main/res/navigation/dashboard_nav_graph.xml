@@ -3,13 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/dashboard_nav_graph"
-    app:startDestination="@id/addNewProductFragment">
+    app:startDestination="@id/userMainScreenFragment">
 
     <fragment
         android:id="@+id/addNewProductFragment"
         android:name="com.example.swapease.ui.fragments.AddNewProductFragment"
         android:label="fragment_add_new_product"
         tools:layout="@layout/fragment_add_new_product" >
+        <action
+            android:id="@+id/action_addNewProductFragment_to_userMainScreenFragment"
+            app:destination="@id/userMainScreenFragment" />
     </fragment>
     <fragment
         android:id="@+id/userDashBoardFragment"
@@ -22,5 +25,45 @@
         android:name="com.example.swapease.ui.fragments.UserMainScreenFragment"
         android:label="fragment_user_main_screen"
         tools:layout="@layout/fragment_user_main_screen" >
+        <action
+            android:id="@+id/action_userMainScreenFragment_to_productDetailsFragment"
+            app:destination="@id/productDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/productDetailsFragment"
+        android:name="com.example.swapease.ui.fragments.ProductDetailsFragment"
+        android:label="fragment_product_details"
+        tools:layout="@layout/fragment_product_details" >
+        <argument
+            android:name="product"
+            app:argType="com.example.swapease.data.models.Product" />
+        <action
+            android:id="@+id/action_productDetailsFragment_to_messagingFragment"
+            app:destination="@id/messagingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.swapease.ui.fragments.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat" >
+        <action
+            android:id="@+id/action_chatFragment_to_messagingFragment"
+            app:destination="@id/messagingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/messagingFragment"
+        android:name="com.example.swapease.ui.fragments.MessagingFragment"
+        android:label="fragment_messaging"
+        tools:layout="@layout/fragment_messaging" >
+        <argument
+            android:name="product"
+            app:argType="com.example.swapease.data.models.Product"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="chatBoxId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="empty" />
     </fragment>
 </navigation>

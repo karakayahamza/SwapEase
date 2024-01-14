@@ -1,8 +1,6 @@
 package com.example.swapease.ui.fragments
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,25 +8,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import com.example.swapease.ui.activities.DashboardActivity
 import com.example.swapease.R
 import com.example.swapease.databinding.FragmentRegisterBinding
+import com.example.swapease.ui.viewmodels.RegisterViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterFragment : Fragment() {
+    private val RC_SIGN_IN = 123
+    private val viewModel by viewModels<RegisterViewModel>()
 
     private val binding by lazy {
         FragmentRegisterBinding.inflate(layoutInflater)
     }
-
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
@@ -53,17 +56,44 @@ class RegisterFragment : Fragment() {
         setupTextWatchers()
         initializeAuthentication()
 
-        val firebaseUser: FirebaseUser? = firebaseAuth.currentUser
-
-        if (firebaseUser != null) {
-            startDashboardActivity()
-        }
 
         binding.signUp.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
             registerWithEmailAndPassword(email, password)
         }
+        binding.btSignIn.setOnClickListener {
+            signInWithGoogle()
+        }
+
+        viewModel.registrationResult.observe(viewLifecycleOwner) { result ->
+            result.onSuccess { message ->
+                displayToast(message)
+                startDashboardActivity()
+            }.onFailure { exception ->
+                displayToast("Registration failed: ${exception.message}")
+            }
+        }
+
+        viewModel.googleSignInResult.observe(viewLifecycleOwner) { result ->
+            result.onSuccess { message ->
+                displayToast(message)
+                startDashboardActivity()
+            }.onFailure { exception ->
+                displayToast("Google Sign-In failed: ${exception.message}")
+            }
+        }
+
+    }
+
+    private fun registerWithEmailAndPassword(email: String, password: String) {
+        val username = binding.etusername.text.toString()
+        viewModel.registerWithEmailAndPassword(email, password, username)
+    }
+
+    private fun signInWithGoogle() {
+        val signInIntent = googleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
     private fun initializeAuthentication() {
@@ -79,42 +109,46 @@ class RegisterFragment : Fragment() {
     }
 
     private fun setupTextWatchers() {
-        binding.etusername.addTextChangedListener(textWatcher)
-        binding.etEmail.addTextChangedListener(textWatcher)
-        binding.etPassword.addTextChangedListener(textWatcher)
-        binding.etConfirmPassword.addTextChangedListener(textWatcher)
-    }
-
-    val textWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-        override fun afterTextChanged(s: Editable?) {
-            val username = binding.etusername.text.toString()
-            val email = binding.etEmail.text.toString()
-            val password = binding.etPassword.text.toString()
-            val confirmPassword = binding.etConfirmPassword.text.toString()
-
-            validateUsername(username)
-            validateEmail(email)
-            isPasswordValid(password)
-            isConfirmPassword(password, confirmPassword)
-
-            binding.signUp.isEnabled = validateEmail(email) && isPasswordValid(password) && validateUsername(username) && isConfirmPassword(password, confirmPassword)
+        with(binding) {
+            etusername.addTextChangedListener(textWatcher)
+            etEmail.addTextChangedListener(textWatcher)
+            etPassword.addTextChangedListener(textWatcher)
+            etConfirmPassword.addTextChangedListener(textWatcher)
         }
     }
 
-    private fun registerWithEmailAndPassword(email: String, password: String) {
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    displayToast("Registration successful")
-                    sendVerificationEmail()
-                } else {
-                    displayToast("Registration failed: ${task.exception?.message}")
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+        override fun afterTextChanged(s: Editable?) {
+            val username = validateUsername(binding.etusername.text.toString())
+            val email = validateEmail(binding.etEmail.text.toString())
+            val password = isPasswordValid(binding.etPassword.text.toString())
+            val confirmPassword = isConfirmPassword(binding.etPassword.text.toString(), binding.etConfirmPassword.text.toString())
+
+            binding.signUp.isEnabled = email && password && username && confirmPassword
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == RC_SIGN_IN) {
+            val signInAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data)
+            if (signInAccountTask.isSuccessful) {
+                val googleSignInAccount = signInAccountTask.getResult(ApiException::class.java)
+                if (googleSignInAccount != null) {
+                    viewModel.signInWithGoogle(googleSignInAccount, {
+                        startDashboardActivity()
+                        displayToast(it)
+                    }, {
+                        displayToast(it)
+                    })
                 }
+            } else {
+                displayToast("Invalid e-mail or password")
             }
+        }
     }
 
     private fun startDashboardActivity() {
@@ -123,77 +157,51 @@ class RegisterFragment : Fragment() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
         )
-    }
-
-    private fun sendVerificationEmail() {
-        val user = firebaseAuth.currentUser
-        user?.sendEmailVerification()
-            ?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    displayToast("Verification email sent. Please check your email.")
-                    startDashboardActivity()
-                    requireActivity().finish()
-                } else {
-                    displayToast("Failed to send verification email: ${task.exception?.message}")
-                }
-            }
+        requireActivity().finish()
     }
 
     private fun displayToast(s: String) {
         Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show()
     }
 
-    @SuppressLint("ResourceType")
     private fun isPasswordValid(password: String): Boolean {
-        val is8char: Boolean = password.length >= 8
+        val is8char = password.length >= 8
         binding.card1.setCardBackgroundColor(getCardColor(is8char))
 
-        val hasNum: Boolean = password.contains(Regex(".*[0-9].*"))
+        val hasNum = password.contains(Regex(".*[0-9].*"))
         binding.card2.setCardBackgroundColor(getCardColor(hasNum))
 
-        val hasUpper: Boolean = password.contains(Regex(".*[A-Z].*"))
+        val hasUpper = password.contains(Regex(".*[A-Z].*"))
         binding.card3.setCardBackgroundColor(getCardColor(hasUpper))
 
         return is8char && hasNum && hasUpper
     }
 
-    @SuppressLint("ResourceType")
     private fun getCardColor(isValid: Boolean): Int {
-        return if (isValid) {
-            Color.parseColor(getString(R.color.green))
-        } else {
-            Color.parseColor(getString(R.color.default_border_color))
-        }
+        return getColor(if (isValid) R.color.green else R.color.default_border_color)
     }
 
-    @SuppressLint("ResourceType")
     private fun validateEmail(email: String): Boolean {
         val emailRegex = Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}")
-        val isValid = email.matches(emailRegex)
-        binding.emailTextInputLayout.boxStrokeColor = getBoxStrokeColor(isValid)
-        return isValid
+        return updateBoxStrokeColor(binding.emailTextInputLayout, email.matches(emailRegex))
     }
 
-    @SuppressLint("ResourceType")
     private fun validateUsername(username: String): Boolean {
-        val isValid: Boolean = username.length >= 5
-        binding.usernameTextInputLayout.boxStrokeColor = getBoxStrokeColor(isValid)
-        return isValid
+        return updateBoxStrokeColor(binding.usernameTextInputLayout, username.length >= 5)
     }
 
-    @SuppressLint("ResourceType")
     private fun isConfirmPassword(password: String, confirmPassword: String): Boolean {
-        val isConfirm: Boolean = password == confirmPassword && password.isNotEmpty()
+        val isConfirm = password == confirmPassword && password.isNotEmpty()
         binding.card4.setCardBackgroundColor(getCardColor(isConfirm))
         return isConfirm
     }
 
-    @SuppressLint("ResourceType")
-    private fun getBoxStrokeColor(isValid: Boolean): Int {
-        return if (isValid) {
-            ContextCompat.getColor(requireContext(), R.color.green)
-        } else {
-            ContextCompat.getColor(requireContext(), R.color.red)
-        }
+    private fun updateBoxStrokeColor(textInputLayout: TextInputLayout, isValid: Boolean): Boolean {
+        textInputLayout.boxStrokeColor = getColor(if (isValid) R.color.green else R.color.red)
+        return isValid
+    }
+
+    private fun getColor(@ColorRes colorResId: Int): Int {
+        return ContextCompat.getColor(requireContext(), colorResId)
     }
 }
