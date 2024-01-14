@@ -45,7 +45,7 @@ class ChatFragment : Fragment() {
         binding.chats.adapter = chatListAdapter
 
         // ViewModel'i initialize et
-        chatViewModel = ViewModelProvider(this).get(ChatViewModel::class.java)
+        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
 
         // Observe LiveData ve RecyclerView'u güncelle
         chatViewModel.getChatBoxesLiveData().observe(viewLifecycleOwner) { chatBoxes ->
