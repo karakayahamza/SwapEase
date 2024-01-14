@@ -48,7 +48,6 @@ class ProductListAdapter(private val onItemClickListener: OnItemClickListener?) 
         fun bind(product: Product) {
             binding.apply {
                 textViewProductName.text = product.productName
-                //textViewDescription.text = product.description
                 binding.category.text = product.category
                 binding.updatedDate.text = "Uploaded on ${product.addedDate}"
 

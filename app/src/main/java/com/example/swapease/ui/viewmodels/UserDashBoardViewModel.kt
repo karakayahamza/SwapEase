@@ -82,7 +82,7 @@ class UserDashBoardViewModel : ViewModel() {
                 }
             }
             .addOnFailureListener { exception ->
-                Log.d(TAG,"Belge alınamadı: $exception")
+                Log.d(TAG,"Document not found: $exception")
             }
 
 

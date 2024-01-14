@@ -104,7 +104,7 @@ class UserDashBoardFragment : Fragment() {
             }
         } else {
             FirebaseAuth.getInstance().signOut()
-            //Toast.makeText(requireContext(), "Logout successful", Toast.LENGTH_SHORT).show()
+
             FirebaseAuth.getInstance().signOut()
             navigateToLogin()
         }
@@ -137,9 +137,14 @@ class UserDashBoardFragment : Fragment() {
             adapter.submitList(productList)
         })
 
-        viewModel.statusMessage.observe(viewLifecycleOwner, Observer { message ->
+        viewModel.statusMessage.observe(viewLifecycleOwner, Observer {
             // Handle status messages, e.g., show a Toast
-            //Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+        })
+
+        viewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading ->
+            // Update UI based on the loading state, for example, show/hide a progress bar
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         })
     }
 
@@ -151,6 +156,9 @@ class UserDashBoardFragment : Fragment() {
         viewModel.userProfileImage.observe(viewLifecycleOwner, Observer { imageUrl ->
             Glide.with(requireContext())
                 .load(imageUrl)
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error_placeholder)
+                .centerCrop()
                 .into(binding.profileImageView)
         })
 

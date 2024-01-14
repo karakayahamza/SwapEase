@@ -87,9 +87,9 @@ class AddNewProductFragment : Fragment() {
             onSuccess = { imageUrl ->
                 // Create a Product object with the necessary information
                 val product = Product(
-                    productId = null, // Bu değeri null olarak bıraktım, çünkü Firestore'da belirli bir belgenin ID'si genellikle belge eklenirken otomatik olarak atanır
+                    productId = null,
                     publisherUid = null,
-                    publisherName = null, // Bu değeri değiştirmeniz gerekiyor
+                    publisherName = null,
                     productName = binding.productNameText.text.toString(),
                     description = binding.productDescription.text.toString(),
                     category = selectedCategory,

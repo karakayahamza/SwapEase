@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.example.swapease.R
 import com.example.swapease.data.models.Product
 import com.example.swapease.databinding.FragmentProductDetailsBinding
 import com.example.swapease.ui.viewmodels.UserViewModel
@@ -65,7 +66,6 @@ class ProductDetailsFragment : Fragment() {
         binding.category.text = "Category : ${param1!!.category}"
         binding.publisherName.text = param1!!.publisherName
 
-        Log.d("TASD",param1!!.imageUrl.toString())
 
         Glide.with(requireContext())
             .load(param1!!.imageUrl)
@@ -77,15 +77,20 @@ class ProductDetailsFragment : Fragment() {
             if (imageUrl != null) {
                 Glide.with(requireContext())
                     .load(imageUrl)
+                    .placeholder(R.drawable.placeholder)
+                    .error(R.drawable.error_placeholder)
+                    .centerCrop()
                     .into(binding.profileImageView)
 
-                Log.d("TTTTTT",imageUrl.toString())
+
             } else {
-                println("ImageUrl bulunamadı.")
+                Glide.with(requireContext())
+                    .load(R.drawable.placeholder)
+                    .centerCrop()
+                    .into(binding.profileImageView)
             }
         }
         userViewModel.getUserImageUrl(param1!!.publisherUid.toString())
-
 
     }
 }

@@ -19,7 +19,6 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var navController: NavController
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDashboardBinding.inflate(layoutInflater)
@@ -34,5 +33,4 @@ class DashboardActivity : AppCompatActivity() {
         bottomNavigationView.setupWithNavController(navController)
 
     }
-
 }

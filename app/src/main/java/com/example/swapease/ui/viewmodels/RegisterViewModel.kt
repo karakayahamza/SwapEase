@@ -51,7 +51,7 @@ class RegisterViewModel : ViewModel() {
                     val userId = firebaseAuth.currentUser?.uid ?: ""
                     val username = account.displayName ?: ""
                     val email = account.email ?: ""
-                    val newUser = User(uid = userId, username = username, email = email, null,0,0.0)
+                    val newUser = User(uid = userId, username = username, email = email, firebaseAuth.currentUser?.photoUrl.toString(),0,0.0)
 
                     fireStore.collection("users").document(userId)
                         .set(newUser)

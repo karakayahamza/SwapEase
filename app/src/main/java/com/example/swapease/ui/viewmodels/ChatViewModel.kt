@@ -15,20 +15,16 @@ class ChatViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
     init {
-        // ViewModel oluşturulduğunda verileri yükle
         loadChatBoxes()
     }
 
-    // LiveData'nin getter'ı
     fun getChatBoxesLiveData(): LiveData<List<ChatBox>> {
         return chatBoxesLiveData
     }
 
-    // Verileri yükleme metodu
     private fun loadChatBoxes() {
         val currentUserId = auth.currentUser?.uid
         currentUserId?.let {
-            // Verileri Firestore'dan al
             val userChatsCollection = db.collection("users").document(it).collection("chats")
 
             userChatsCollection.get()
@@ -47,24 +43,19 @@ class ChatViewModel : ViewModel() {
     }
 
     fun getUserData(userId: String, onSuccess: (String, String) -> Unit, onFailure: (Exception) -> Unit) {
-        // Firebase Firestore bağlantısını oluştur
         val userDocRef = db.collection("users").document(userId)
 
-        // Kullanıcı belgesini getir
         userDocRef.get()
             .addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    // Belge başarıyla alındığında callback'i çağır
                     val username = documentSnapshot.getString("username") ?: ""
                     val userProfileImage = documentSnapshot.getString("userProfileImage") ?: ""
                     onSuccess(username, userProfileImage)
                 } else {
-                    // Belge bulunamazsa hata durumunda callback'i çağır
                     onFailure(Exception("User document not found"))
                 }
             }
             .addOnFailureListener { exception ->
-                // Hata durumunda callback'i çağır
                 onFailure(exception)
             }
     }

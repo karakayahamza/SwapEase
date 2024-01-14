@@ -36,7 +36,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
     }
 
     override fun getItemId(position: Int): Long {
-        // messages listesinden belirli bir pozisyondaki mesajın messageId değerini kullanarak benzersiz bir kimlik oluştur
+
         return messages[position].second.messageId?.hashCode()?.toLong() ?: 0L
     }
 

@@ -98,7 +98,6 @@ class AddNewProductViewModel : ViewModel() {
                 callback(userName)
             }
             .addOnFailureListener { exception ->
-                println("Belge alınamadı: $exception")
                 callback("Unknown")
             }
     }

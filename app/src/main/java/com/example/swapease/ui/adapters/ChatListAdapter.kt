@@ -61,7 +61,7 @@ class ChatListAdapter(
             val otherUser = result?.second ?: ""
 
             viewModel.getUserData(otherUser, { username, userProfileImage ->
-                // Başarıyla tamamlandığında kullanıcı adını ve profil resmini güncelle
+
                 binding.userName.text = username
                 Glide.with(binding.root.context)
                     .load(userProfileImage)
@@ -70,9 +70,7 @@ class ChatListAdapter(
                     .centerCrop()
                     .into(binding.publisherImage)
 
-                Log.d(TAG,userProfileImage.toString())
             }, { exception ->
-                // Hata durumunda işlem yap
                 Log.e(TAG, "Error getting user data", exception)
             })
         }

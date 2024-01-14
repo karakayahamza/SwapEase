@@ -1,0 +1,52 @@
+@startuml
+
+package "View" {
+  [UserMainScreenFragment]
+  [UserDashBoardFragment]
+  [MessagingFragment]
+  [AddNewProductFragment]
+  [ChatFragment]
+  [RegisterActivity]
+  [LoginActivity]
+}
+
+package "ViewModel" {
+  [UserMainScreenViewModel]
+  [UserDashBoardViewModel]
+  [MessagingViewModel]
+  [AddNewProductViewModel]
+  [ChatViewModel]
+  [RegisterViewModel]
+  [LoginViewModel]
+  [UserViewModel]
+}
+
+package "Model" {
+  [Product]
+  [User]
+  [ChatBox]
+  [Message]
+}
+
+[UserMainScreenFragment] --> [UserMainScreenViewModel] : uses
+[UserDashBoardFragment] --> [UserDashBoardViewModel] : uses
+[MessagingFragment] --> [MessagingViewModel] : uses
+[AddNewProductFragment] --> [AddNewProductViewModel] : uses
+[ChatFragment] --> [ChatViewModel] : uses
+[RegisterActivity] --> [RegisterViewModel] : uses
+[LoginActivity] --> [LoginViewModel] : uses
+
+[UserMainScreenViewModel] --> [Product] : includes
+[UserMainScreenViewModel] --> [User] : includes
+[UserDashBoardViewModel] --> [Product] : includes
+[UserDashBoardViewModel] --> [User] : includes
+[MessagingViewModel] --> [ChatBox] : includes
+[MessagingViewModel] --> [Message] : includes
+[AddNewProductViewModel] --> [Product] : includes
+[AddNewProductViewModel] --> [User] : includes
+[ChatViewModel] --> [ChatBox] : includes
+[ChatViewModel] --> [Message] : includes
+[RegisterViewModel] --> [User] : includes
+[LoginViewModel] --> [User] : includes
+
+@enduml

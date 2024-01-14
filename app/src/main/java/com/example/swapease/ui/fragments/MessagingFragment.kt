@@ -74,7 +74,7 @@ class MessagingFragment : Fragment() {
     }
     override fun onDestroyView() {
         super.onDestroyView()
-        // RecyclerView temizleme
+
         binding.chatRecyclerView.adapter = null
         _binding = null
     }
